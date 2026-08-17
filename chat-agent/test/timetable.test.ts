@@ -113,4 +113,18 @@ describe('softConstraints', () => {
     assert.equal(settings['teacherAvailability']?.enabled, true);
     assert.equal(settings['teacherAvailability']?.weight, 1);
   });
+
+  it('finds parallelSubject constraint definition', () => {
+    const definition = findSoftConstraintDefinition('parallelSubject');
+    assert.ok(definition);
+    assert.equal(definition?.id, 'parallelSubject');
+    assert.equal(definition?.name, 'Parallel subject');
+    assert.equal(definition?.defaultEnabled, true);
+  });
+
+  it('defaults parallel subject constraint to enabled in createDefaultSoftConstraintSettings', () => {
+    const settings = createDefaultSoftConstraintSettings();
+    assert.equal(settings['parallelSubject']?.enabled, true);
+    assert.equal(settings['parallelSubject']?.weight, 1);
+  });
 });

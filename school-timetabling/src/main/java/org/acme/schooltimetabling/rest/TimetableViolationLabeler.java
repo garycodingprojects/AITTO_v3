@@ -64,6 +64,12 @@ public final class TimetableViolationLabeler {
         if (isSoftConstraintEnabled(timetable, TimetableConstraintProvider.TEACHER_AVAILABILITY)) {
             labelTeacherAvailability(assignedLessons);
         }
+        if (isSoftConstraintEnabled(timetable, TimetableConstraintProvider.PREFERRED_WEEKDAY)) {
+            labelPreferredWeekday(assignedLessons);
+        }
+        if (isSoftConstraintEnabled(timetable, TimetableConstraintProvider.PARALLEL_SUBJECT)) {
+            labelParallelSubject(assignedLessons);
+        }
     }
 
     private static void clearViolations(List<Lesson> lessons) {
@@ -316,6 +322,48 @@ public final class TimetableViolationLabeler {
                         "soft",
                         "Teacher " + lesson.getTeacher() + " is not available on " + dayOfWeek + ".",
                         List.of()));
+            }
+        }
+    }
+
+    /** Labels lessons scheduled outside their preferred weekdays. */
+    private static void labelPreferredWeekday(List<Lesson> assignedLessons) {
+        for (Lesson lesson : assignedLessons) {
+            if (lesson.getTimeslot() == null || lesson.getPreferredWeekdays() == null
+                    || lesson.getPreferredWeekdays().isEmpty()) {
+                continue;
+            }
+            DayOfWeek dayOfWeek = lesson.getTimeslot().getDayOfWeek();
+            if (!lesson.getPreferredWeekdays().contains(dayOfWeek.toString())) {
+                addViolation(lesson, new ViolationInfo(
+                        TimetableConstraintProvider.PREFERRED_WEEKDAY,
+                        "soft",
+                        "Subject " + lesson.getSubject() + " is scheduled outside preferred weekdays on "
+                                + dayOfWeek + ".",
+                        List.of()));
+            }
+        }
+    }
+
+    /** Labels parallel-linked lessons that do not share weekday and start time. */
+    private static void labelParallelSubject(List<Lesson> assignedLessons) {
+        for (int i = 0; i < assignedLessons.size(); i++) {
+            Lesson first = assignedLessons.get(i);
+            for (int j = i + 1; j < assignedLessons.size(); j++) {
+                Lesson second = assignedLessons.get(j);
+                if (Objects.equals(first.getTeacher(), second.getTeacher())
+                        || Objects.equals(first.getStudentGroup(), second.getStudentGroup())) {
+                    continue;
+                }
+                if (!TimetableConstraintProvider.isParallelPair(first, second)
+                        || TimetableConstraintProvider.shareSameStart(first, second)) {
+                    continue;
+                }
+                addPairViolation(first, second,
+                        TimetableConstraintProvider.PARALLEL_SUBJECT,
+                        "soft",
+                        "Card " + first.getId() + " should share a timeslot with parallel card "
+                                + second.getId() + ".");
             }
         }
     }

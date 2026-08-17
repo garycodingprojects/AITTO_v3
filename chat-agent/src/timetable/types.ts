@@ -32,6 +32,10 @@ export interface Lesson {
   manualStudentGroupPlacement?: string | null;
   durationInMinutes: number;
   subjectTypes?: string[];
+  /** Preferred weekdays (MONDAY..FRIDAY) for the Preferred weekday soft constraint. */
+  preferredWeekdays?: string[];
+  /** Partner lesson/card IDs that should share this lesson's weekday and start time. */
+  parallelCardIds?: string[];
   allowedRoomIds?: string[];
   timeslot: string | Timeslot | null;
   room: string | Room | null;
@@ -67,6 +71,10 @@ export interface SubjectCardInput {
   durationInMinutes?: number;
   subjectTypes?: string[];
   roomNames?: string[];
+  /** Preferred weekdays; defaults to all Mon–Fri when omitted. */
+  preferredWeekdays?: string[];
+  /** Partner card IDs that should share a timeslot; defaults to none. */
+  parallelCardIds?: string[];
 }
 
 /** Structured payload returned to the browser alongside agent text. */

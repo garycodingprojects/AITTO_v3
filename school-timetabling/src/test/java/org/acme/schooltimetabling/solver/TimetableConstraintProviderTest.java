@@ -400,4 +400,72 @@ class TimetableConstraintProviderTest {
                 .penalizesBy(0);
     }
 
+    @Test
+    void preferredWeekday_lessonOutsidePreferredDaysScores1Soft() {
+        Lesson preferredMondayLesson = new Lesson("1", "Subject1", "Teacher1", "Group1", 60, monday830, ROOM1);
+        preferredMondayLesson.setPreferredWeekdays(List.of("MONDAY", "TUESDAY"));
+        Lesson outsidePreferredLesson = new Lesson("2", "Subject2", "Teacher1", "Group2", 60, tuesday900, ROOM1);
+        outsidePreferredLesson.setPreferredWeekdays(List.of("MONDAY"));
+        Lesson preferredTuesdayLesson = new Lesson("3", "Subject3", "Teacher1", "Group3", 60, tuesday830, ROOM2);
+        preferredTuesdayLesson.setPreferredWeekdays(List.of("TUESDAY"));
+        Lesson anotherOutsideLesson = new Lesson("4", "Subject4", "Teacher1", "Group4", 60, monday900, ROOM1);
+        anotherOutsideLesson.setPreferredWeekdays(List.of("TUESDAY", "WEDNESDAY"));
+        constraintVerifier.verifyThat(TimetableConstraintProvider::preferredWeekday)
+                .given(preferredMondayLesson, outsidePreferredLesson, preferredTuesdayLesson, anotherOutsideLesson)
+                .penalizesBy(2);
+    }
+
+    @Test
+    void preferredWeekday_allDaysPreferredOrEmptyScores0Soft() {
+        Lesson allDaysPreferred = new Lesson("1", "Subject1", "Teacher1", "Group1", 60, monday830, ROOM1);
+        allDaysPreferred.setPreferredWeekdays(
+                List.of("MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"));
+        Lesson emptyPreferred = new Lesson("2", "Subject2", "Teacher1", "Group2", 60, tuesday900, ROOM2);
+        emptyPreferred.setPreferredWeekdays(List.of());
+        Lesson matchingPreferred = new Lesson("3", "Subject3", "Teacher1", "Group3", 60, monday930, ROOM1);
+        matchingPreferred.setPreferredWeekdays(List.of("MONDAY"));
+        constraintVerifier.verifyThat(TimetableConstraintProvider::preferredWeekday)
+                .given(allDaysPreferred, emptyPreferred, matchingPreferred)
+                .penalizesBy(0);
+    }
+
+    @Test
+    void parallelSubject_differentStartTimesScores1Soft() {
+        Lesson mathLesson = new Lesson("1", "Math", "Teacher1", "Group1", 60, monday830, ROOM1);
+        mathLesson.setParallelCardIds(List.of("2"));
+        Lesson physicsLesson = new Lesson("2", "Physics", "Teacher2", "Group2", 60, tuesday900, ROOM2);
+        physicsLesson.setParallelCardIds(List.of());
+        constraintVerifier.verifyThat(TimetableConstraintProvider::parallelSubject)
+                .given(mathLesson, physicsLesson)
+                .penalizesBy(1);
+    }
+
+    @Test
+    void parallelSubject_sameStartOrEmptyOrSameTeacherGroupScores0Soft() {
+        Lesson alignedMath = new Lesson("1", "Math", "Teacher1", "Group1", 60, monday830, ROOM1);
+        alignedMath.setParallelCardIds(List.of("2"));
+        Lesson alignedPhysics = new Lesson("2", "Physics", "Teacher2", "Group2", 60, monday830, ROOM2);
+        alignedPhysics.setParallelCardIds(List.of());
+
+        Lesson unpairedChem = new Lesson("3", "Chemistry", "Teacher3", "Group3", 60, monday900, ROOM1);
+        unpairedChem.setParallelCardIds(List.of());
+        Lesson unpairedBio = new Lesson("4", "Biology", "Teacher4", "Group4", 60, tuesday830, ROOM2);
+        unpairedBio.setParallelCardIds(List.of());
+
+        Lesson sameTeacherEnglish = new Lesson("5", "English", "Teacher5", "Group5", 60, monday830, ROOM1);
+        sameTeacherEnglish.setParallelCardIds(List.of("6"));
+        Lesson sameTeacherHistory = new Lesson("6", "History", "Teacher5", "Group6", 60, tuesday900, ROOM2);
+        sameTeacherHistory.setParallelCardIds(List.of());
+
+        Lesson sameGroupArt = new Lesson("7", "Art", "Teacher7", "Group7", 60, monday830, ROOM1);
+        sameGroupArt.setParallelCardIds(List.of("8"));
+        Lesson sameGroupMusic = new Lesson("8", "Music", "Teacher8", "Group7", 60, tuesday900, ROOM2);
+        sameGroupMusic.setParallelCardIds(List.of());
+
+        constraintVerifier.verifyThat(TimetableConstraintProvider::parallelSubject)
+                .given(alignedMath, alignedPhysics, unpairedChem, unpairedBio,
+                        sameTeacherEnglish, sameTeacherHistory, sameGroupArt, sameGroupMusic)
+                .penalizesBy(0);
+    }
+
 }

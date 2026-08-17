@@ -108,6 +108,24 @@ export const SOFT_CONSTRAINT_DEFINITIONS: SoftConstraintDefinition[] = [
     helpWhen: "Lesson is scheduled on a day the teacher marked unavailable",
     helpContribution: "−weight per lesson",
   },
+  {
+    id: "preferredWeekday",
+    name: "Preferred weekday",
+    label: "Prefer subject preferred weekdays",
+    labelZh: "科目盡量安排喺偏好嘅平日",
+    defaultEnabled: true,
+    helpWhen: "Lesson is scheduled on a day outside the subject card preferred weekdays",
+    helpContribution: "−weight per lesson",
+  },
+  {
+    id: "parallelSubject",
+    name: "Parallel subject",
+    label: "Keep parallel subjects on the same timeslot",
+    labelZh: "平行科目盡量安排喺同一時段",
+    defaultEnabled: true,
+    helpWhen: "Linked subject cards are not on the same weekday and start time",
+    helpContribution: "−weight per pair",
+  },
 ];
 
 /** Builds default settings: all soft constraints disabled (matches Demo UI on first load). */

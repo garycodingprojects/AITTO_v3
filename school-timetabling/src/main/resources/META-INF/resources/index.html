@@ -35,21 +35,34 @@
       margin: 0 0.15rem;
       background-color: #cbd5e1;
     }
-    /* Subject cards group: labeled and amber-themed to distinguish from timetable actions. */
-    .demo-scheduler-subject-cards-group {
+    /* Shared labeled toolbar groups: timetable (indigo) vs subject cards (amber). */
+    .demo-scheduler-toolbar-group {
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
       padding: 0.35rem 0.5rem;
       border-radius: 0.375rem;
-      background-color: #fffbeb;
-      border: 1px solid #fcd34d;
     }
     .demo-scheduler-group-label {
       font-size: 0.75rem;
       font-weight: 600;
-      color: #92400e;
       line-height: 1.1;
+    }
+    /* Timetable project group: indigo so it is distinct from subject-card actions. */
+    .demo-scheduler-timetable-group {
+      background-color: #eef2ff;
+      border: 1px solid #818cf8;
+    }
+    .demo-scheduler-timetable-group .demo-scheduler-group-label {
+      color: #3730a3;
+    }
+    /* Subject cards group: amber-themed for Preparation workspace transfer. */
+    .demo-scheduler-subject-cards-group {
+      background-color: #fffbeb;
+      border: 1px solid #fcd34d;
+    }
+    .demo-scheduler-subject-cards-group .demo-scheduler-group-label {
+      color: #92400e;
     }
     /* Amber outline buttons: used for subject-cards actions and the Preparation workspace toolbar. */
     .btn-outline-subject-cards {
@@ -63,7 +76,7 @@
       background-color: #fef3c7;
       border-color: #d97706;
     }
-    /* Indigo outline buttons: AI Scheduler timetable cache actions (Save/Load/Clear). */
+    /* Indigo outline buttons: AI Scheduler timetable project (Save/Load/Clear/Download/Upload). */
     .btn-outline-scheduler {
       color: #4338ca;
       border-color: #818cf8;
@@ -446,9 +459,70 @@
       background-color: #dcfce7;
       color: #14532d;
     }
+    /* Preferred weekday column: Mon–Fri soft preference for each subject card. */
+    #preparation .prep-th-weekday {
+      background-color: #fce7f3;
+      color: #9d174d;
+      min-width: 9rem;
+    }
     #preparation .prep-th-actions {
       background-color: #f1f5f9;
       color: #64748b;
+    }
+    /* Compact Mon–Fri checkboxes inside the Weekday card column. */
+    #preparation .card-preferred-weekday-cell {
+      white-space: nowrap;
+      text-align: center;
+    }
+    #preparation .card-preferred-weekday-cell .form-check-input {
+      margin-left: 0.15rem;
+      margin-right: 0.15rem;
+    }
+    /* Parallel subject column: compact add-from-dropdown, not a full checklist. */
+    #preparation .prep-th-parallel {
+      background-color: #e0f2fe;
+      color: #075985;
+      min-width: 8.5rem;
+      max-width: 11rem;
+    }
+    #preparation .card-parallel-subject-cell {
+      max-width: 11rem;
+      vertical-align: middle;
+      text-align: left;
+    }
+    #preparation .card-parallel-subject-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.2rem;
+      margin-bottom: 0.25rem;
+    }
+    #preparation .card-parallel-subject-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.15rem;
+      max-width: 100%;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    #preparation .card-parallel-subject-chip .card-parallel-subject-chip-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #preparation .card-parallel-subject-chip-remove {
+      line-height: 1;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      opacity: 0.75;
+    }
+    #preparation .card-parallel-subject-add {
+      width: 100%;
+      min-width: 0;
+      font-size: 0.75rem;
+      padding-top: 0.15rem;
+      padding-bottom: 0.15rem;
     }
     /* Highlight the subject-card row under the cursor for easier scanning. */
     #preparation .prep-table tbody tr {
@@ -1063,36 +1137,49 @@
 
     <div class="demo-scheduler-toolbar border rounded p-2">
       <div class="d-flex flex-wrap align-items-center gap-2">
-        <div class="btn-group btn-group-sm" role="group" aria-label="Timetable cache actions">
-          <button id="saveScheduleToCacheButton" type="button" class="btn btn-outline-scheduler" title="Save the current timetable to browser cache">
-            <span class="fas fa-save me-1"></span>Save
-          </button>
-          <button id="loadScheduleFromCacheButton" type="button" class="btn btn-outline-scheduler" title="Load the timetable from browser cache">
-            <span class="fas fa-database me-1"></span>Load
-          </button>
-          <button id="clearSubjectCardsButton" type="button" class="btn btn-outline-scheduler" title="Clear all subject cards from the current timetable">
-            <span class="fas fa-trash me-1"></span>Clear
-          </button>
+        <div class="demo-scheduler-toolbar-group demo-scheduler-timetable-group">
+          <div class="demo-scheduler-group-label"><span class="fas fa-calendar-days me-1" aria-hidden="true"></span>Timetable</div>
+          <div class="d-flex flex-wrap gap-1">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Timetable cache actions">
+              <button id="saveScheduleToCacheButton" type="button" class="btn btn-outline-scheduler" title="Save the current timetable project to browser cache">
+                <span class="fas fa-save me-1"></span>Save
+              </button>
+              <button id="loadScheduleFromCacheButton" type="button" class="btn btn-outline-scheduler" title="Load the timetable project from browser cache">
+                <span class="fas fa-database me-1"></span>Load
+              </button>
+              <button id="clearSubjectCardsButton" type="button" class="btn btn-outline-scheduler" title="Clear all lessons from the current timetable">
+                <span class="fas fa-trash me-1"></span>Clear
+              </button>
+            </div>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Timetable file actions">
+              <button id="downloadScheduleJsonButton" type="button" class="btn btn-outline-scheduler" title="Download the current timetable project as JSON">
+                <span class="fas fa-download me-1"></span>Download
+              </button>
+              <button id="uploadScheduleJsonButton" type="button" class="btn btn-outline-scheduler" title="Upload a saved timetable project JSON file">
+                <span class="fas fa-upload me-1"></span>Upload
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="demo-toolbar-divider" aria-hidden="true"></div>
-        <div class="btn-group btn-group-sm" role="group" aria-label="Timetable file actions">
-          <button id="downloadScheduleJsonButton" type="button" class="btn btn-outline-secondary" title="Download the current timetable as JSON">
-            <span class="fas fa-download me-1"></span>Download
-          </button>
-          <button id="uploadScheduleJsonButton" type="button" class="btn btn-outline-secondary" title="Upload a saved timetable JSON file">
-            <span class="fas fa-upload me-1"></span>Upload
-          </button>
-        </div>
-        <div class="demo-toolbar-divider" aria-hidden="true"></div>
-        <div class="demo-scheduler-subject-cards-group">
-          <div class="demo-scheduler-group-label">Subject cards</div>
-          <div class="btn-group btn-group-sm" role="group" aria-label="Load subject cards">
-            <button id="loadPreparedFromCacheButton" type="button" class="btn btn-outline-subject-cards" title="Load subject cards from browser cache (saved on Preparation tab)">
-              <span class="fas fa-layer-group me-1"></span>Cache
-            </button>
-            <button id="loadPreparedFromFileButton" type="button" class="btn btn-outline-subject-cards" title="Load subject cards from a workspace JSON file">
-              <span class="fas fa-file-upload me-1"></span>File
-            </button>
+        <div class="demo-scheduler-toolbar-group demo-scheduler-subject-cards-group">
+          <div class="demo-scheduler-group-label"><span class="fas fa-layer-group me-1" aria-hidden="true"></span>Subject cards</div>
+          <div class="d-flex flex-wrap gap-1">
+            <div class="btn-group btn-group-sm" role="group" aria-label="Subject cards cache">
+              <button id="savePreparedToCacheButton" type="button" class="btn btn-outline-subject-cards" title="Save subject cards to browser cache for the Preparation tab">
+                <span class="fas fa-save me-1"></span>Save
+              </button>
+              <button id="loadPreparedFromCacheButton" type="button" class="btn btn-outline-subject-cards" title="Load subject cards from browser cache (saved on Preparation tab)">
+                <span class="fas fa-database me-1"></span>Load
+              </button>
+            </div>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Subject cards file">
+              <button id="downloadPreparedWorkspaceButton" type="button" class="btn btn-outline-subject-cards" title="Download subject cards as a workspace JSON for the Preparation tab">
+                <span class="fas fa-download me-1"></span>Download
+              </button>
+              <button id="loadPreparedFromFileButton" type="button" class="btn btn-outline-subject-cards" title="Load subject cards from a workspace JSON file">
+                <span class="fas fa-upload me-1"></span>Upload
+              </button>
+            </div>
           </div>
         </div>
         <input type="file" id="loadPreparedFromFileInput" accept="application/json,.json" class="d-none"/>
@@ -1610,6 +1697,8 @@
                 <th class="prep-th-teacher card-table-sortable" data-sort-key="teacher" title="Sort by Teacher">Teacher</th>
                 <th class="prep-th-types card-table-sortable" data-sort-key="subjectTypes" title="Sort by Types">Types</th>
                 <th class="prep-th-rooms">Eligible rooms</th>
+                <th class="prep-th-weekday" title="Preferred weekdays for the AI Scheduler soft constraint">Weekday<br/><span class="small fw-normal">Mon Tue Wed Thu Fri</span></th>
+                <th class="prep-th-parallel" title="Linked subject cards that should share the same weekday and start time">Parallel Subject</th>
                 <th class="prep-th-actions"></th>
               </tr>
             </thead>
@@ -1697,7 +1786,7 @@
             </div>
             <div class="tutorial-step">
               <span class="tutorial-step-number">5</span>
-              <div><strong>Move data to the scheduler.</strong> Select <strong>Save</strong> on the Preparation tab, then open AI Scheduler and select <strong>Cache</strong> or <strong>File</strong> in the subject-cards group on the right. Alternatively, download a workspace JSON on Preparation and upload it with <strong>File</strong>.</div>
+              <div><strong>Move data between Preparation and the scheduler.</strong> On Preparation, select <strong>Save</strong>, then on AI Scheduler use <strong>Load</strong> or <strong>Upload</strong> in the subject-cards group. After editing cards in the scheduler, select <strong>Save</strong> or <strong>Download</strong> there so Preparation can load them from cache or file.</div>
             </div>
           </div>
         </section>
@@ -1712,6 +1801,7 @@
               <li class="mb-2"><strong>Scores:</strong> hard violations must reach zero for a feasible timetable. Use the <strong>?</strong> button for an explanation.</li>
               <li class="mb-2"><strong>Violation details:</strong> select a highlighted lesson card to see the broken constraint and related lessons.</li>
               <li class="mb-2"><strong>Manual assignment:</strong> drag a lesson from <strong>Unassigned</strong> into an available timetable slot.</li>
+              <li class="mb-2"><strong>Edit an unassigned card:</strong> select the pencil button next to Remove to change subject, teacher, duration, rooms, and related fields.</li>
               <li class="mb-2"><strong>Protect an assignment:</strong> pin a placed lesson so a later solve keeps it in that timeslot. Unpin it when changes are allowed.</li>
               <li><strong>Remove an assignment:</strong> return a placed lesson to Unassigned, then place it again or solve the timetable.</li>
             </ul>
@@ -1724,9 +1814,10 @@
           <div class="card-header"><span class="fas fa-save me-2 text-info"></span>Save and explore the timetable</div>
           <div class="card-body">
             <ul class="mb-0">
-              <li class="mb-2">Select <strong>Save</strong> to store the current timetable in browser cache, or <strong>Load</strong> to restore it later.</li>
-              <li class="mb-2">Select <strong>Download</strong> to save the timetable as a JSON file, or <strong>Upload</strong> to restore one.</li>
-              <li class="mb-2">Select <strong>Clear</strong> to remove all subject cards from the current timetable.</li>
+              <li class="mb-2">In the indigo <strong>Timetable</strong> group, select <strong>Save</strong> to store the current timetable project in browser cache, or <strong>Load</strong> to restore it later.</li>
+              <li class="mb-2">In the same group, select <strong>Download</strong> to save the timetable project as a JSON file, or <strong>Upload</strong> to restore one.</li>
+              <li class="mb-2">Select <strong>Clear</strong> in the Timetable group to remove all lessons from the current timetable.</li>
+              <li class="mb-2">In the amber <strong>Subject cards</strong> group, select <strong>Save</strong> or <strong>Download</strong> to send the current cards back to the Preparation tab (cache or file).</li>
               <li class="mb-2">Use <strong>View weekday</strong> to open a focused day view in a separate window.</li>
               <li class="mb-2">Use <strong>Apply filter</strong> to find common free periods or explore replacement options.</li>
               <li>Save a full Preparation workspace when you want to preserve both setup data and subject cards for later editing.</li>
@@ -1870,7 +1961,7 @@
             </div>
             <div class="tutorial-step">
               <span class="tutorial-step-number">5</span>
-              <div><strong>將資料匯入排課器。</strong>在 Preparation 分頁按 <strong>Save</strong>，然後在 AI Scheduler 右側的 subject cards 群組按 <strong>Cache</strong> 或 <strong>File</strong>。亦可下載 workspace JSON 並以 <strong>File</strong> 載入。</div>
+              <div><strong>在 Preparation 與排課器之間傳送資料。</strong>在 Preparation 按 <strong>Save</strong>，然後在 AI Scheduler 的 subject cards 群組按 <strong>Load</strong> 或 <strong>Upload</strong>。在排課器編輯科目卡後，按 <strong>Save</strong> 或 <strong>Download</strong>，即可讓 Preparation 從快取或檔案載入。</div>
             </div>
           </div>
         </section>
@@ -1885,6 +1976,7 @@
               <li class="mb-2"><strong>分數：</strong>硬性違規必須為零才能達成可行課表。按 <strong>?</strong> 按鈕查看說明。</li>
               <li class="mb-2"><strong>違規詳情：</strong>點選高亮課程卡查看違反的限制及相關課程。</li>
               <li class="mb-2"><strong>手動分配：</strong>將課程從 <strong>Unassigned</strong> 拖曳至可用時段。</li>
+              <li class="mb-2"><strong>編輯未分配科目卡：</strong>按移除按鈕旁的鉛筆圖示，即可更改科目、教師、時數、課室等資料。</li>
               <li class="mb-2"><strong>保護分配：</strong>釘選已放置的課程，使後續求解保留該時段。需要更改時取消釘選。</li>
               <li><strong>移除分配：</strong>將已放置課程退回 Unassigned，再重新放置或求解。</li>
             </ul>
@@ -1897,9 +1989,10 @@
           <div class="card-header"><span class="fas fa-save me-2 text-info"></span>儲存及探索課表</div>
           <div class="card-body">
             <ul class="mb-0">
-              <li class="mb-2">按 <strong>Save</strong> 將目前課表存入瀏覽器快取，或按 <strong>Load</strong> 還原。</li>
-              <li class="mb-2">按 <strong>Download</strong> 將課表存成 JSON 檔，或按 <strong>Upload</strong> 還原。</li>
-              <li class="mb-2">按 <strong>Clear</strong> 清除目前課表的所有 subject cards。</li>
+              <li class="mb-2">在靛藍色 <strong>Timetable</strong> 群組按 <strong>Save</strong> 將目前課表專案存入瀏覽器快取，或按 <strong>Load</strong> 還原。</li>
+              <li class="mb-2">在同一群組按 <strong>Download</strong> 將課表專案存成 JSON 檔，或按 <strong>Upload</strong> 還原。</li>
+              <li class="mb-2">在 Timetable 群組按 <strong>Clear</strong> 清除目前課表的所有課程。</li>
+              <li class="mb-2">在琥珀色 <strong>Subject cards</strong> 群組按 <strong>Save</strong> 或 <strong>Download</strong>，即可將目前科目卡傳回 Preparation 分頁（快取或檔案）。</li>
               <li class="mb-2">使用 <strong>View weekday</strong> 在新視窗開啟專注的日視圖。</li>
               <li class="mb-2">使用 <strong>Apply filter</strong> 尋找共同空堂或探索代課選項。</li>
               <li>儲存完整的 Preparation workspace 以保留設定資料及科目卡供日後編輯。</li>
@@ -2047,6 +2140,59 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Edit popup for an unassigned subject card in the AI Scheduler sidebar. -->
+<div class="modal fade" id="editLessonCardModal" tabindex="-1" aria-labelledby="editLessonCardModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editLessonCardModalLabel">Edit subject card</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editLessonCardForm">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label" for="editLessonSubjectInput">Subject</label>
+              <input type="text" class="form-control" id="editLessonSubjectInput" list="customLessonSubjectSuggestions" required/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="editLessonSubjectTypesInput">Type(s)</label>
+              <input type="text" class="form-control" id="editLessonSubjectTypesInput" placeholder="Theory, Practical"/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="editLessonTeacherInput">Teacher</label>
+              <input type="text" class="form-control" id="editLessonTeacherInput" list="customLessonTeacherSuggestions" required/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="editLessonStudentGroupInput">Student group</label>
+              <input type="text" class="form-control" id="editLessonStudentGroupInput" list="customLessonStudentGroupSuggestions" required/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label" for="editLessonDurationInput">Duration (min)</label>
+              <input type="number" class="form-control" id="editLessonDurationInput" min="30" step="30" required/>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label mb-1">Preferred weekdays</label>
+              <div id="editLessonPreferredWeekdays" class="edit-lesson-weekday-row"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label mb-1">Eligible classrooms</label>
+              <div id="editLessonRoomCheckboxes" class="border rounded p-2 edit-lesson-checkbox-list"></div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label mb-1">Parallel subjects</label>
+              <div id="editLessonParallelCheckboxes" class="border rounded p-2 edit-lesson-checkbox-list"></div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" form="editLessonCardForm" id="saveEditLessonCardButton" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>

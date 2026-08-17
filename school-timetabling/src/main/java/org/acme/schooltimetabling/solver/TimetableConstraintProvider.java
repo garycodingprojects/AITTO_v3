@@ -1,6 +1,7 @@
 package org.acme.schooltimetabling.solver;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Objects;
 
 import ai.timefold.solver.core.api.score.HardSoftScore;
@@ -40,6 +41,8 @@ public class TimetableConstraintProvider implements ConstraintProvider {
     public static final String GOOD_LUNCHTIME_STUDENT_GROUP = "Good lunchtime for student group";
     public static final String ROOM_PRIORITY = "Room priority";
     public static final String TEACHER_AVAILABILITY = "Teacher availability";
+    public static final String PREFERRED_WEEKDAY = "Preferred weekday";
+    public static final String PARALLEL_SUBJECT = "Parallel subject";
 
     /** All soft constraints exposed in the demo UI checkbox panel. */
     public static final java.util.List<String> SOFT_CONSTRAINTS = java.util.List.of(
@@ -52,7 +55,9 @@ public class TimetableConstraintProvider implements ConstraintProvider {
             GOOD_LUNCHTIME_TEACHER,
             GOOD_LUNCHTIME_STUDENT_GROUP,
             ROOM_PRIORITY,
-            TEACHER_AVAILABILITY);
+            TEACHER_AVAILABILITY,
+            PREFERRED_WEEKDAY,
+            PARALLEL_SUBJECT);
 
     @Override
     public Constraint[] defineConstraints(ConstraintFactory constraintFactory) {
@@ -78,7 +83,9 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                 goodLunchtimeForTeacher(constraintFactory),
                 goodLunchtimeForStudentGroup(constraintFactory),
                 roomPriority(constraintFactory),
-                teacherAvailability(constraintFactory)
+                teacherAvailability(constraintFactory),
+                preferredWeekday(constraintFactory),
+                parallelSubject(constraintFactory)
         };
     }
 
@@ -290,6 +297,52 @@ public class TimetableConstraintProvider implements ConstraintProvider {
                         && lesson.getTeacherUnavailableDays().contains(lesson.getTimeslot().getDayOfWeek().toString()))
                 .penalize(HardSoftScore.ONE_SOFT)
                 .asConstraint(TEACHER_AVAILABILITY);
+    }
+
+    Constraint preferredWeekday(ConstraintFactory constraintFactory) {
+        // Penalize when assigned day is outside the subject card's preferred weekdays.
+        return constraintFactory
+                .forEach(Lesson.class)
+                .filter(lesson -> lesson.getTimeslot() != null
+                        && lesson.getPreferredWeekdays() != null
+                        && !lesson.getPreferredWeekdays().isEmpty()
+                        && !lesson.getPreferredWeekdays().contains(
+                                lesson.getTimeslot().getDayOfWeek().toString()))
+                .penalize(HardSoftScore.ONE_SOFT)
+                .asConstraint(PREFERRED_WEEKDAY);
+    }
+
+    Constraint parallelSubject(ConstraintFactory constraintFactory) {
+        // Penalize parallel-linked lessons that do not share weekday + start time.
+        return constraintFactory
+                .forEachUniquePair(Lesson.class)
+                .filter((first, second) -> first.getTimeslot() != null && second.getTimeslot() != null
+                        && !Objects.equals(first.getTeacher(), second.getTeacher())
+                        && !Objects.equals(first.getStudentGroup(), second.getStudentGroup())
+                        && isParallelPair(first, second)
+                        && !shareSameStart(first, second))
+                .penalize(HardSoftScore.ONE_SOFT)
+                .asConstraint(PARALLEL_SUBJECT);
+    }
+
+    /** True when either lesson lists the other's card ID as a parallel partner. */
+    public static boolean isParallelPair(Lesson first, Lesson second) {
+        List<String> firstParallel = first.getParallelCardIds();
+        List<String> secondParallel = second.getParallelCardIds();
+        boolean firstListsSecond = firstParallel != null && !firstParallel.isEmpty()
+                && firstParallel.contains(second.getId());
+        boolean secondListsFirst = secondParallel != null && !secondParallel.isEmpty()
+                && secondParallel.contains(first.getId());
+        return firstListsSecond || secondListsFirst;
+    }
+
+    /** True when both lessons start on the same weekday at the same clock time. */
+    public static boolean shareSameStart(Lesson first, Lesson second) {
+        if (first.getTimeslot() == null || second.getTimeslot() == null) {
+            return false;
+        }
+        return first.getTimeslot().getDayOfWeek().equals(second.getTimeslot().getDayOfWeek())
+                && first.getTimeslot().getStartTime().equals(second.getTimeslot().getStartTime());
     }
 
     private static boolean shareSameDay(Lesson first, Lesson second) {

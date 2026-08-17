@@ -94,6 +94,19 @@ public class Lesson {
      */
     private List<String> teacherUnavailableDays = new ArrayList<>();
 
+    /**
+     * Preferred weekdays for this subject card/lesson (e.g. MONDAY..FRIDAY).
+     * Empty or full list means no soft preference / available all days.
+     * Used by the Preferred weekday soft constraint.
+     */
+    private List<String> preferredWeekdays = new ArrayList<>();
+
+    /**
+     * Lesson/card IDs that should share this lesson's weekday and start time.
+     * Used by the Parallel subject soft constraint.
+     */
+    private List<String> parallelCardIds = new ArrayList<>();
+
     public Lesson() {
     }
 
@@ -418,5 +431,23 @@ public class Lesson {
 
     public void setTeacherUnavailableDays(List<String> teacherUnavailableDays) {
         this.teacherUnavailableDays = teacherUnavailableDays == null ? new ArrayList<>() : new ArrayList<>(teacherUnavailableDays);
+    }
+
+    /** Preferred weekdays for this lesson (never null after set). */
+    public List<String> getPreferredWeekdays() {
+        return preferredWeekdays;
+    }
+
+    public void setPreferredWeekdays(List<String> preferredWeekdays) {
+        this.preferredWeekdays = preferredWeekdays == null ? new ArrayList<>() : new ArrayList<>(preferredWeekdays);
+    }
+
+    /** Parallel partner card IDs for this lesson (never null after set). */
+    public List<String> getParallelCardIds() {
+        return parallelCardIds;
+    }
+
+    public void setParallelCardIds(List<String> parallelCardIds) {
+        this.parallelCardIds = parallelCardIds == null ? new ArrayList<>() : new ArrayList<>(parallelCardIds);
     }
 }

@@ -25,6 +25,43 @@ const EXAMPLE_SUBJECT_TYPE_TAGS = ["Trade", "Generic", "Theory", "Practical"];
 /** Days of week for teacher availability checkboxes (Mon–Fri). */
 const TEACHER_AVAILABILITY_DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
 
+/** Preferred weekdays for subject cards (same Mon–Fri set as teacher availability). */
+const PREFERRED_WEEKDAY_DAYS = TEACHER_AVAILABILITY_DAYS;
+
+/** Default preferred weekdays: subject is available on every weekday. */
+function defaultPreferredWeekdays() {
+  return PREFERRED_WEEKDAY_DAYS.slice();
+}
+
+/**
+ * Normalizes preferred weekdays from workspace/lesson JSON.
+ * Missing/null defaults to all days; an explicit empty array is preserved.
+ */
+function normalizePreferredWeekdays(raw) {
+  if (raw == null) {
+    return defaultPreferredWeekdays();
+  }
+  return (raw || [])
+    .map(day => String(day).trim())
+    .filter(day => PREFERRED_WEEKDAY_DAYS.includes(day));
+}
+
+/**
+ * Normalizes parallel card IDs from workspace/lesson JSON.
+ * Missing/null defaults to an empty list (no parallel pairing).
+ * Ignores legacy subject-name values that are not card IDs.
+ */
+function normalizeParallelCardIds(raw) {
+  return [...new Set((raw || [])
+    .map(id => String(id).trim())
+    .filter(id => id && isPreparationCardId(id)))];
+}
+
+/** True when the value looks like a subject-card / lesson ID (e.g. 0003). */
+function isPreparationCardId(value) {
+  return /^\d+$/.test(String(value).trim());
+}
+
 /** Serializes LocalTime the same way as backend Jackson (HH:mm:ss). */
 const PREPARATION_TIME_FORMATTER = JSJoda.DateTimeFormatter.ofPattern("HH:mm:ss");
 
@@ -441,6 +478,10 @@ function buildTimetableJson() {
       durationInMinutes: durationInMinutes,
       subjectTypes: (card.subjectTypes || []).slice(),
       teacherUnavailableDays: teacherUnavailableDays,
+      // Preferred weekdays for the Preferred weekday soft constraint
+      preferredWeekdays: normalizePreferredWeekdays(card.preferredWeekdays),
+      // Linked subject-card IDs for the Parallel subject soft constraint
+      parallelCardIds: normalizeParallelCardIds(card.parallelCardIds || card.parallelSubjects),
       allowedRoomIds: allowedRoomIds,
       timeslot: null,
       room: null
@@ -504,7 +545,9 @@ function cloneCard(card) {
     teacher: card.teacher == null || card.teacher === "" ? null : card.teacher,
     subjectTypes: (card.subjectTypes || []).slice(),
     roomNames: (card.roomNames || []).slice(),
-    teacherUnavailableDays: (card.teacherUnavailableDays || []).slice()
+    teacherUnavailableDays: (card.teacherUnavailableDays || []).slice(),
+    preferredWeekdays: normalizePreferredWeekdays(card.preferredWeekdays),
+    parallelCardIds: normalizeParallelCardIds(card.parallelCardIds || card.parallelSubjects)
   };
 }
 
@@ -719,7 +762,11 @@ function normalizeCard(raw, legacyRoomIdToName, legacySubjectIdToName, legacySub
     teacher: raw.teacher == null || raw.teacher === "" ? null : raw.teacher,
     subjectTypes: normalizeSubjectTypes(raw.subjectTypes),
     roomNames: [...new Set(roomNames.filter(name => name))],
-    teacherUnavailableDays: (raw.teacherUnavailableDays || []).map(day => String(day).trim()).filter(day => day)
+    teacherUnavailableDays: (raw.teacherUnavailableDays || []).map(day => String(day).trim()).filter(day => day),
+    // Missing preferredWeekdays on legacy cards → available all weekdays
+    preferredWeekdays: normalizePreferredWeekdays(raw.preferredWeekdays),
+    // Missing parallelCardIds on legacy cards → no parallel pairing
+    parallelCardIds: normalizeParallelCardIds(raw.parallelCardIds || raw.parallelSubjects)
   };
 }
 
@@ -905,9 +952,34 @@ function buildPreparationSubjectsFromDemoLessons(lessons, roomNames) {
 }
 
 /**
+ * Resolves eligible classroom names for one lesson/card.
+ * Uses allowedRoomIds when present; otherwise falls back to every room name.
+ */
+function resolveCardRoomNamesFromLesson(lesson, rooms, fallbackRoomNames) {
+  const roomById = new Map();
+  for (const room of rooms || []) {
+    if (room && room.id != null) {
+      roomById.set(String(room.id), room.name || String(room.id));
+    }
+  }
+  const allowedIds = lesson.allowedRoomIds || [];
+  if (allowedIds.length === 0) {
+    return fallbackRoomNames.slice();
+  }
+  const names = [];
+  for (const roomId of allowedIds) {
+    const name = roomById.get(String(roomId));
+    if (name && !names.includes(name)) {
+      names.push(name);
+    }
+  }
+  return names.length > 0 ? names : fallbackRoomNames.slice();
+}
+
+/**
  * Builds preparation subject cards from demo timetable lessons (one card per lesson).
  */
-function buildPreparationCardsFromDemoLessons(lessons, roomNames) {
+function buildPreparationCardsFromDemoLessons(lessons, roomNames, rooms) {
   return (lessons || []).map(lesson => ({
     id: lesson.id,
     subjectName: lesson.subject,
@@ -917,9 +989,72 @@ function buildPreparationCardsFromDemoLessons(lessons, roomNames) {
     studentGroup: lesson.studentGroup,
     teacher: lesson.teacher == null || lesson.teacher === "" ? null : lesson.teacher,
     subjectTypes: normalizeSubjectTypes(lesson.subjectTypes),
-    roomNames: roomNames.slice(),
-    teacherUnavailableDays: (lesson.teacherUnavailableDays || []).map(day => String(day).trim()).filter(day => day)
+    roomNames: resolveCardRoomNamesFromLesson(lesson, rooms, roomNames),
+    teacherUnavailableDays: (lesson.teacherUnavailableDays || []).map(day => String(day).trim()).filter(day => day),
+    preferredWeekdays: normalizePreferredWeekdays(lesson.preferredWeekdays),
+    parallelCardIds: normalizeParallelCardIds(lesson.parallelCardIds || lesson.parallelSubjects)
   }));
+}
+
+/** Reads ECA day/period from timetable ecaBlocks metadata when present. */
+function extractEcaFromTimetable(timetable) {
+  const block = (timetable && timetable.ecaBlocks ? timetable.ecaBlocks : [])[0];
+  if (!block || !block.dayOfWeek || !block.period) {
+    return null;
+  }
+  return { dayOfWeek: block.dayOfWeek, period: block.period };
+}
+
+/**
+ * Builds a Preparation workspace JSON from an AI Scheduler timetable
+ * so edited subject cards can be loaded back on the Preparation tab.
+ */
+function buildWorkspaceJsonFromTimetable(timetable) {
+  if (timetable == null || timetable.lessons == null || timetable.rooms == null) {
+    throw new Error("No timetable with subject cards is loaded.");
+  }
+  const rooms = normalizeRooms(timetable.rooms);
+  const roomNames = rooms.map(room => room.name);
+  const weekdays = extractWeekdaysFromDemoTimeslots(timetable.timeslots);
+  const schoolDay = extractSchoolDayFromDemoTimeslots(timetable.timeslots);
+  const lessons = timetable.lessons || [];
+  const eca = extractEcaFromTimetable(timetable);
+  const workspaceName = timetable.name || "Subject cards from AI Scheduler";
+  return {
+    format: PREPARATION_WORKSPACE_FORMAT,
+    name: workspaceName,
+    weekdays: weekdays.length > 0 ? weekdays : ["MONDAY", "TUESDAY"],
+    schoolDay: { start: schoolDay.start, end: schoolDay.end },
+    eca: eca,
+    preparation: {
+      subjects: buildPreparationSubjectsFromDemoLessons(lessons, roomNames),
+      studentGroups: [...new Set(lessons.map(lesson => lesson.studentGroup).filter(Boolean))].sort(),
+      teachers: [...new Set(lessons.map(lesson => lesson.teacher).filter(Boolean))].sort(),
+      rooms: rooms.map(room => ({ name: room.name, priority: room.priority || 0 })),
+      cards: buildPreparationCardsFromDemoLessons(lessons, roomNames, timetable.rooms)
+    },
+    // Keep the original timetable payload so AI Scheduler can load this file back.
+    timetable: {
+      name: workspaceName,
+      timeslots: (timetable.timeslots || []).slice(),
+      rooms: (timetable.rooms || []).slice(),
+      lessons: (timetable.lessons || []).slice(),
+      ecaBlocks: (timetable.ecaBlocks || []).slice(),
+      score: timetable.score == null ? null : timetable.score,
+      solverStatus: timetable.solverStatus == null ? null : timetable.solverStatus
+    }
+  };
+}
+
+/**
+ * Writes a timetable as Preparation cache and refreshes the Preparation tab.
+ * Returns the workspace JSON that was saved.
+ */
+function saveWorkspaceFromTimetableToCache(timetable) {
+  const workspace = buildWorkspaceJsonFromTimetable(timetable);
+  localStorage.setItem(PREPARATION_CACHE_KEY, JSON.stringify(workspace));
+  applyWorkspaceJson(workspace);
+  return workspace;
 }
 
 /**
@@ -944,7 +1079,7 @@ function applyDemoTimetableToPreparation(timetable, demoDataId) {
   for (const teacher of preparationState.teachers) {
     preparationState.teacherAvailability[teacher] = TEACHER_AVAILABILITY_DAYS.slice();
   }
-  preparationState.cards = buildPreparationCardsFromDemoLessons(lessons, roomNames);
+  preparationState.cards = buildPreparationCardsFromDemoLessons(lessons, roomNames, rooms);
   sanitizeAllCardSubjectTypes();
   recomputeIdCounters();
   renderPreparationUi();
@@ -1127,6 +1262,164 @@ function updateCardsForTeacherAvailability(teacherName) {
       card.teacherUnavailableDays = unavailableDays.slice();
     }
   }
+}
+
+/**
+ * Creates a Mon–Fri checkbox for a subject card's preferred weekday.
+ * Toggles update card.preferredWeekdays immediately for the soft constraint.
+ */
+function createCardPreferredWeekdayCheckbox(cardId, dayOfWeek, isChecked) {
+  const checkboxId = "card_weekday_" + convertToId(cardId + dayOfWeek);
+  return $("<input type='checkbox' class='form-check-input card-preferred-weekday-checkbox'/>")
+    .prop("id", checkboxId)
+    .prop("checked", isChecked)
+    .attr("data-card-id", cardId)
+    .attr("data-day-of-week", dayOfWeek)
+    .attr("title", dayOfWeek.charAt(0) + dayOfWeek.slice(1).toLowerCase())
+    .on("change", function () {
+      const targetCardId = $(this).attr("data-card-id");
+      const targetDay = $(this).attr("data-day-of-week");
+      const isPreferred = $(this).prop("checked");
+      const card = preparationState.cards.find(c => c.id === targetCardId);
+      if (!card) {
+        return;
+      }
+      if (!card.preferredWeekdays) {
+        card.preferredWeekdays = defaultPreferredWeekdays();
+      }
+      if (isPreferred) {
+        if (!card.preferredWeekdays.includes(targetDay)) {
+          card.preferredWeekdays.push(targetDay);
+        }
+      } else {
+        card.preferredWeekdays = card.preferredWeekdays.filter(day => day !== targetDay);
+      }
+    });
+}
+
+/**
+ * Adds a two-way parallel link between two subject cards, then refreshes both cells.
+ */
+function addParallelCardLink(cardId, partnerCardId) {
+  if (!cardId || !partnerCardId || cardId === partnerCardId) {
+    return;
+  }
+  const card = preparationState.cards.find(c => c.id === cardId);
+  const partner = preparationState.cards.find(c => c.id === partnerCardId);
+  if (!card || !partner) {
+    return;
+  }
+  addParallelCardId(card, partnerCardId);
+  addParallelCardId(partner, cardId);
+  refreshCardParallelSubjectCell(cardId);
+  refreshCardParallelSubjectCell(partnerCardId);
+}
+
+/**
+ * Removes a two-way parallel link between two subject cards, then refreshes both cells.
+ */
+function removeParallelCardLink(cardId, partnerCardId) {
+  const card = preparationState.cards.find(c => c.id === cardId);
+  if (card) {
+    card.parallelCardIds = (card.parallelCardIds || []).filter(id => id !== partnerCardId);
+  }
+  const partner = preparationState.cards.find(c => c.id === partnerCardId);
+  if (partner) {
+    partner.parallelCardIds = (partner.parallelCardIds || []).filter(id => id !== cardId);
+  }
+  refreshCardParallelSubjectCell(cardId);
+  refreshCardParallelSubjectCell(partnerCardId);
+}
+
+/** Appends a partner card ID to a card's parallel list if missing. */
+function addParallelCardId(card, partnerCardId) {
+  if (!card.parallelCardIds) {
+    card.parallelCardIds = [];
+  }
+  if (!card.parallelCardIds.includes(partnerCardId)) {
+    card.parallelCardIds.push(partnerCardId);
+  }
+}
+
+/** Drops removed card IDs from every remaining card's parallel list. */
+function unlinkRemovedCardIds(removedIds) {
+  const removed = new Set(removedIds || []);
+  for (const card of preparationState.cards) {
+    card.parallelCardIds = (card.parallelCardIds || []).filter(id => !removed.has(id));
+  }
+}
+
+/** Replaces the Parallel Subject cell for one card without rebuilding the whole table. */
+function refreshCardParallelSubjectCell(cardId) {
+  const card = preparationState.cards.find(c => c.id === cardId);
+  const $row = $(`#cardTableBody tr[data-card-id="${cardId}"]`);
+  if (!card || $row.length === 0) {
+    return;
+  }
+  $row.find("td.card-parallel-subject-cell").replaceWith(createCardParallelSubjectCell(card));
+}
+
+/** Dropdown/chip label: Card ID, with subject for identification. */
+function formatParallelCardOptionLabel(targetCard) {
+  const subjectLabel = targetCard.subjectName ? " — " + targetCard.subjectName : "";
+  return targetCard.id + subjectLabel;
+}
+
+/**
+ * Builds a compact Parallel Subject cell: selected Card IDs as chips plus an Add dropdown.
+ */
+function createCardParallelSubjectCell(card) {
+  const $cell = $("<td class='card-parallel-subject-cell'/>");
+  const selectedIds = card.parallelCardIds || [];
+  const otherCards = preparationState.cards
+    .filter(other => other.id !== card.id)
+    .slice()
+    .sort((left, right) => String(left.id).localeCompare(String(right.id), undefined, { numeric: true }));
+  const remainingCards = otherCards.filter(other => !selectedIds.includes(other.id));
+
+  const $chips = $("<div class='card-parallel-subject-chips'/>");
+  if (selectedIds.length === 0) {
+    $chips.append($("<span class='text-muted small'/>").text("None"));
+  } else {
+    for (const partnerId of selectedIds) {
+      const partner = preparationState.cards.find(other => other.id === partnerId);
+      const chipLabel = partner ? partner.id : partnerId;
+      const chipTitle = partner ? formatParallelCardOptionLabel(partner) : partnerId;
+      $chips.append(
+        $("<span class='badge rounded-pill bg-info text-dark card-parallel-subject-chip'/>")
+          .append($("<span class='card-parallel-subject-chip-label'/>").text(chipLabel).attr("title", chipTitle))
+          .append(
+            $("<button type='button' class='card-parallel-subject-chip-remove' aria-label='Remove'/>")
+              .html("&times;")
+              .on("click", (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                removeParallelCardLink(card.id, partnerId);
+              })
+          )
+      );
+    }
+  }
+  $cell.append($chips);
+
+  const placeholder = otherCards.length === 0
+    ? "No other cards"
+    : (remainingCards.length === 0 ? "All added" : "Add Card ID…");
+  const $select = $("<select class='form-select form-select-sm card-parallel-subject-add'/>")
+    .append($("<option/>").val("").text(placeholder));
+  for (const other of remainingCards) {
+    $select.append($("<option/>").val(other.id).text(formatParallelCardOptionLabel(other)));
+  }
+  $select.prop("disabled", remainingCards.length === 0);
+  $select.on("change", function () {
+    const partnerId = $(this).val();
+    if (!partnerId) {
+      return;
+    }
+    addParallelCardLink(card.id, partnerId);
+  });
+  $cell.append($select);
+  return $cell;
 }
 
 function renderStudentGroupList() {
@@ -1699,9 +1992,20 @@ function renderCardTable() {
   for (const card of getSortedSubjectCards()) {
     const roomLabels = (card.roomNames || []).join(", ");
     const typeLabels = formatSubjectTypesLabel(card.subjectTypes);
+    // Ensure preferred weekdays exist for checkbox rendering (legacy cards)
+    if (!card.preferredWeekdays) {
+      card.preferredWeekdays = defaultPreferredWeekdays();
+    }
+    const preferredDays = card.preferredWeekdays;
+    const $weekdayCell = $("<td class='card-preferred-weekday-cell'/>");
+    for (const dayOfWeek of PREFERRED_WEEKDAY_DAYS) {
+      $weekdayCell.append(createCardPreferredWeekdayCheckbox(
+        card.id, dayOfWeek, preferredDays.includes(dayOfWeek)));
+    }
 
     $tbody.append(
       $("<tr/>")
+        .attr("data-card-id", card.id)
         .append($("<td/>").text(card.id))
         .append($("<td/>").text(card.subjectName))
         .append($("<td/>").text(formatCardDurationLabel(card.durationInMinutes)))
@@ -1709,6 +2013,8 @@ function renderCardTable() {
         .append($("<td/>").text(formatCardTeacherLabel(card.teacher)))
         .append($("<td/>").text(typeLabels))
         .append($("<td/>").text(roomLabels || "(none)"))
+        .append($weekdayCell)
+        .append(createCardParallelSubjectCell(card))
         .append(
           $("<td/>").append(
             $(`<button type="button" class="btn btn-outline-secondary btn-sm py-0 me-1"/>`)
@@ -1803,8 +2109,12 @@ function addStudentGroup() {
 }
 
 function removeSubject(subjectName) {
+  const removedIds = preparationState.cards
+    .filter(c => c.subjectName === subjectName)
+    .map(c => c.id);
   preparationState.subjects = preparationState.subjects.filter(s => s.name !== subjectName);
   preparationState.cards = preparationState.cards.filter(c => c.subjectName !== subjectName);
+  unlinkRemovedCardIds(removedIds);
   renderPreparationUi();
 }
 
@@ -1820,21 +2130,29 @@ function removeRoom(roomName) {
   }
 
 function removeTeacher(teacherName) {
+  const removedIds = preparationState.cards
+    .filter(c => c.teacher === teacherName)
+    .map(c => c.id);
   preparationState.teachers = preparationState.teachers.filter(t => t !== teacherName);
   for (const subject of preparationState.subjects) {
     subject.teachers = (subject.teachers || []).filter(t => t !== teacherName);
   }
   preparationState.cards = preparationState.cards.filter(c => c.teacher !== teacherName);
   delete preparationState.teacherAvailability[teacherName];
+  unlinkRemovedCardIds(removedIds);
   renderPreparationUi();
 }
 
 function removeStudentGroup(groupName) {
+  const removedIds = preparationState.cards
+    .filter(c => c.studentGroup === groupName)
+    .map(c => c.id);
   preparationState.studentGroups = preparationState.studentGroups.filter(g => g !== groupName);
   for (const subject of preparationState.subjects) {
     subject.studentGroups = (subject.studentGroups || []).filter(g => g !== groupName);
   }
   preparationState.cards = preparationState.cards.filter(c => c.studentGroup !== groupName);
+  unlinkRemovedCardIds(removedIds);
   renderPreparationUi();
 }
 
@@ -1879,6 +2197,13 @@ function saveCard() {
       card.teacher = teacher;
       card.subjectTypes = subjectTypes;
       card.roomNames = roomNames;
+      // Preserve existing preferred weekdays when editing other fields
+      if (!card.preferredWeekdays) {
+        card.preferredWeekdays = defaultPreferredWeekdays();
+      }
+      if (!card.parallelCardIds) {
+        card.parallelCardIds = [];
+      }
     }
     editingCardId = null;
     showPreparationMessage("Subject card updated.", "success");
@@ -1890,7 +2215,9 @@ function saveCard() {
       studentGroup: studentGroup,
       teacher: teacher,
       subjectTypes: subjectTypes,
-      roomNames: roomNames
+      roomNames: roomNames,
+      preferredWeekdays: defaultPreferredWeekdays(),
+      parallelCardIds: []
     });
     showPreparationMessage("Subject card created.", "success");
   }
@@ -1912,7 +2239,9 @@ function copyCard(cardId) {
     studentGroup: sourceCard.studentGroup,
     teacher: sourceCard.teacher == null || sourceCard.teacher === "" ? null : sourceCard.teacher,
     subjectTypes: (sourceCard.subjectTypes || []).slice(),
-    roomNames: (sourceCard.roomNames || []).slice()
+    roomNames: (sourceCard.roomNames || []).slice(),
+    preferredWeekdays: normalizePreferredWeekdays(sourceCard.preferredWeekdays),
+    parallelCardIds: []
   });
   showPreparationMessage("Subject card copied as " + preparationState.cards[preparationState.cards.length - 1].id + ".", "success");
   renderPreparationUi();
@@ -1923,6 +2252,7 @@ function removeCard(cardId) {
     editingCardId = null;
   }
   preparationState.cards = preparationState.cards.filter(c => c.id !== cardId);
+  unlinkRemovedCardIds([cardId]);
   renderPreparationUi();
 }
 
@@ -1966,7 +2296,11 @@ function generateSubjectCards() {
         studentGroup: studentGroup,
         teacher: null,
         subjectTypes: (subject.types || []).slice(),
-        roomNames: eligibleRooms.slice()
+        roomNames: eligibleRooms.slice(),
+        // Generated cards default to available on all weekdays
+        preferredWeekdays: defaultPreferredWeekdays(),
+        // Generated cards start with no parallel pairing
+        parallelCardIds: []
       });
       createdCount++;
     }
@@ -2027,6 +2361,9 @@ window.PREPARATION_WORKSPACE_FORMAT = PREPARATION_WORKSPACE_FORMAT;
 window.loadPreparationFromCacheObject = loadPreparationFromCacheObject;
 window.extractTimetableFromPreparedJson = extractTimetableFromPreparedJson;
 window.loadDemoDatasetIntoPreparation = loadDemoDatasetIntoPreparation;
+window.buildWorkspaceJsonFromTimetable = buildWorkspaceJsonFromTimetable;
+window.saveWorkspaceFromTimetableToCache = saveWorkspaceFromTimetableToCache;
+window.downloadJsonFile = downloadJsonFile;
 
 $(document).ready(function () {
   renderPreparationUi();

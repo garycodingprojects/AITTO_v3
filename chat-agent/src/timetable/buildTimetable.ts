@@ -172,6 +172,10 @@ export function buildTimetableFromSubjectCards(options: {
     const allowedRoomIds = roomNames
       .map(name => roomNameToId.get(name))
       .filter((id): id is string => id != null);
+    // Default preferred weekdays to all Mon–Fri when the card omits them
+    const preferredWeekdays = card.preferredWeekdays?.length
+      ? card.preferredWeekdays.slice()
+      : DAY_ORDER.slice();
 
     return {
       id: String(index + 1).padStart(4, '0'),
@@ -180,6 +184,9 @@ export function buildTimetableFromSubjectCards(options: {
       studentGroup: card.studentGroup,
       durationInMinutes,
       subjectTypes: card.subjectTypes ?? [],
+      preferredWeekdays,
+      // Parallel partners default to none when the card omits them
+      parallelCardIds: card.parallelCardIds?.length ? card.parallelCardIds.slice() : [],
       allowedRoomIds,
       timeslot: null,
       room: null,

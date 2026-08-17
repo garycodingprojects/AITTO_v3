@@ -186,7 +186,7 @@
   z-index: 3;
 }
 
-/* Remove control on unassigned sidebar cards (top-right corner) */
+/* Edit / remove controls on unassigned sidebar cards (top-right corner) */
 .lesson-card-actions-unassigned {
   top: 0.25rem;
   right: 0.25rem;
@@ -209,6 +209,16 @@
   border-color: #0d6efd;
 }
 
+.lesson-card-edit-btn {
+  color: #0d6efd;
+}
+
+.lesson-card-edit-btn:hover {
+  color: #ffffff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
 .lesson-card-remove-btn {
   color: #842029;
 }
@@ -217,6 +227,18 @@
   color: #ffffff;
   background-color: #dc3545;
   border-color: #dc3545;
+}
+
+/* Compact checkbox groups inside the unassigned-card edit popup */
+.edit-lesson-weekday-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+}
+
+.edit-lesson-checkbox-list {
+  max-height: 8rem;
+  overflow-y: auto;
 }
 
 .timetable-lesson-card-pinned .card {
@@ -332,6 +354,11 @@ body.timetable-entity-drag-active:has(.timetable-lesson-dragging) .timetable-les
 
 .unassigned-lesson-item {
   flex: 0 0 auto;
+}
+
+/* Keep the subject title clear of the edit/remove buttons in the top-right corner. */
+.unassigned-lesson-item .card-title {
+  padding-right: 3.5rem;
 }
 
 .unassigned-sidebar-empty {

@@ -99,6 +99,24 @@ const SOFT_CONSTRAINTS = [
     defaultChecked: true,
     helpWhen: "Lesson is scheduled on a day the teacher marked unavailable",
     helpContribution: "−weight per lesson"
+  },
+  {
+    id: "preferredWeekday",
+    name: "Preferred weekday",
+    label: "Prefer subject preferred weekdays",
+    labelZh: "科目盡量安排喺偏好嘅平日",
+    defaultChecked: true,
+    helpWhen: "Lesson is scheduled on a day outside the subject card preferred weekdays",
+    helpContribution: "−weight per lesson"
+  },
+  {
+    id: "parallelSubject",
+    name: "Parallel subject",
+    label: "Keep parallel subjects on the same timeslot",
+    labelZh: "平行科目盡量安排喺同一時段",
+    defaultChecked: true,
+    helpWhen: "Linked subject cards are not on the same weekday and start time",
+    helpContribution: "−weight per pair"
   }
 ];
 
@@ -229,16 +247,23 @@ $(document).ready(function () {
   bindSoftConstraintWeightControls();
   initUnassignedSidebar();
   initCustomLessonCardForm();
+  initEditLessonCardModal();
   renderScoreDisplay(null);
   fetchDemoData();
 
-  // Timetable cache, file import/export, and subject-card loading from Preparation.
+  // Timetable cache, file import/export, and subject-card transfer with Preparation.
   $("#saveScheduleToCacheButton").click(saveScheduleToCache);
   $("#loadScheduleFromCacheButton").click(loadScheduleFromCache);
   $("#clearSubjectCardsButton").click(clearAllSubjectCards);
 
   $("#loadPreparedFromCacheButton").click(function () {
     loadPreparedTimetableFromCache();
+  });
+  $("#savePreparedToCacheButton").click(function () {
+    savePreparedSubjectCardsToCache();
+  });
+  $("#downloadPreparedWorkspaceButton").click(function () {
+    downloadPreparedSubjectCardsJson();
   });
   $("#loadPreparedFromFileButton").click(function () {
     $("#loadPreparedFromFileInput").click();
@@ -310,6 +335,17 @@ $(document).ready(function () {
     toggleLessonPin(lessonId);
   });
 
+  // Open the edit popup for an unassigned subject card.
+  $(document).on("click", ".lesson-card-edit-btn", function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (isSolverRunning()) {
+      return;
+    }
+    const lessonId = $(this).closest(".timetable-lesson-card").attr("data-lesson-id");
+    showEditLessonCardModal(lessonId);
+  });
+
   // Remove an unassigned lesson from the sidebar after user confirmation.
   $(document).on("click", ".lesson-card-remove-btn", function (event) {
     event.preventDefault();
@@ -321,12 +357,22 @@ $(document).ready(function () {
     removeUnassignedLesson(lessonId);
   });
 
+  // Keep pin / edit / remove clicks from starting a card drag.
+  $(document).on("mousedown", ".lesson-card-action-btn", function (event) {
+    event.stopPropagation();
+  });
+
   // Drag-and-drop manual scheduling in Group 1 entity views (By room / teacher / student group).
   $(document).on("mousedown", ".timetable-lesson-draggable", function () {
     // Clear a stuck drag-active state from an aborted prior drag (grid cards stop responding otherwise).
     $("body").removeClass("timetable-entity-drag-active");
   });
   $(document).on("dragstart", ".timetable-lesson-draggable", function (event) {
+    // Action buttons sit on the draggable card; ignore drags that start on them.
+    if ($(event.target).closest(".lesson-card-action-btn").length > 0) {
+      event.preventDefault();
+      return;
+    }
     draggedLessonId = $(this).attr("data-lesson-id");
     event.originalEvent.dataTransfer.setData("text/plain", draggedLessonId);
     event.originalEvent.dataTransfer.effectAllowed = "move";
@@ -737,12 +783,11 @@ function renderSoftConstraintCheckboxes() {
   const $container = $("#softConstraintCheckboxes");
   $container.empty();
   
-  const precheckConstraint = SOFT_CONSTRAINTS.find(c => c.defaultChecked);
-  
+  // Support multiple soft constraints marked defaultChecked (e.g. Teacher availability + Preferred weekday)
   SOFT_CONSTRAINTS.forEach(constraint => {
     const checkboxId = getSoftConstraintCheckboxId(constraint.id);
     const weightInputId = getSoftConstraintWeightInputId(constraint.id);
-    const isChecked = precheckConstraint && constraint.id === precheckConstraint.id;
+    const isChecked = Boolean(constraint.defaultChecked);
     $container.append($(`<div class="col"/>`).append(
       $(`<div class="soft-constraint-row"/>`).append(
         $(`<div class="form-check soft-constraint-check"/>`).append(
@@ -1034,7 +1079,7 @@ function saveScheduleToCache() {
   }
   try {
     localStorage.setItem(SCHEDULER_TIMETABLE_CACHE_KEY, JSON.stringify(loadedSchedule));
-    alert("Timetable saved to browser cache.");
+    alert("Timetable project saved to browser cache.");
   } catch (error) {
     alert("Failed to save to cache: " + error.message);
   }
@@ -1046,7 +1091,7 @@ function saveScheduleToCache() {
 function loadScheduleFromCache() {
   const raw = localStorage.getItem(SCHEDULER_TIMETABLE_CACHE_KEY);
   if (!raw) {
-    alert("No timetable found in browser cache.");
+    alert("No timetable project found in browser cache.");
     return;
   }
   try {
@@ -1084,7 +1129,8 @@ function clearAllSubjectCards() {
 }
 
 /**
- * Loads subject cards from browser cache (full workspace JSON saved on the Preparation tab).
+ * Loads subject cards from browser cache (full workspace JSON saved on the Preparation tab
+ * or by Save in the AI Scheduler subject-cards group).
  */
 function loadPreparedTimetableFromCache() {
   if (typeof loadPreparationFromCacheObject !== "function") {
@@ -1094,13 +1140,78 @@ function loadPreparedTimetableFromCache() {
   try {
     const cached = loadPreparationFromCacheObject();
     if (!cached) {
-      alert("No subject cards found in browser cache. Save a workspace on the Preparation tab first.");
+      alert("No subject cards found in browser cache. Save a workspace on the Preparation tab, or use Save in the subject-cards group first.");
       return;
     }
     const timetable = extractTimetableFromPreparedJson(cached);
     loadCustomTimetable(timetable, cached.name || "subject cards from cache");
   } catch (error) {
     alert("Failed to load from cache: " + error.message);
+  }
+}
+
+/**
+ * Saves the current scheduler lessons as a Preparation workspace in browser cache
+ * so the Preparation tab can load and edit the same subject cards.
+ */
+function savePreparedSubjectCardsToCache() {
+  if (loadedSchedule == null) {
+    alert("No timetable loaded. Load or create subject cards first.");
+    return;
+  }
+  if (typeof saveWorkspaceFromTimetableToCache !== "function") {
+    alert("Preparation module not loaded.");
+    return;
+  }
+  const cacheKey = window.PREPARATION_CACHE_KEY;
+  const existing = cacheKey ? localStorage.getItem(cacheKey) : null;
+  if (existing && !window.confirm(
+    "Replace the Preparation workspace in browser cache with the current subject cards?"
+  )) {
+    return;
+  }
+  try {
+    const workspace = saveWorkspaceFromTimetableToCache(loadedSchedule);
+    const cardCount = (loadedSchedule.lessons || []).length;
+    $("#info").text("Saved " + cardCount + " subject cards to Preparation cache.");
+    alert("Subject cards saved to browser cache for the Preparation tab (" + (workspace.preparation.cards || []).length + " cards).");
+  } catch (error) {
+    alert("Failed to save subject cards: " + error.message);
+  }
+}
+
+/**
+ * Downloads the current scheduler lessons as a Preparation workspace JSON file.
+ */
+function downloadPreparedSubjectCardsJson() {
+  if (loadedSchedule == null) {
+    alert("No timetable loaded. Load or create subject cards first.");
+    return;
+  }
+  if (typeof buildWorkspaceJsonFromTimetable !== "function") {
+    alert("Preparation module not loaded.");
+    return;
+  }
+  try {
+    const workspace = buildWorkspaceJsonFromTimetable(loadedSchedule);
+    const filename = "preparation-workspace.json";
+    if (typeof downloadJsonFile === "function") {
+      downloadJsonFile(workspace, filename);
+    } else {
+      const blob = new Blob([JSON.stringify(workspace, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(url);
+    }
+    const cardCount = (loadedSchedule.lessons || []).length;
+    $("#info").text("Downloaded " + cardCount + " subject cards as workspace JSON.");
+  } catch (error) {
+    alert("Failed to download subject cards: " + error.message);
   }
 }
 
@@ -1338,6 +1449,9 @@ function buildLessonCard(lesson, color, options) {
 
   if (options.showUnassignedActions) {
     const $actions = $(`<div class="lesson-card-actions lesson-card-actions-unassigned"/>`);
+    // Edit opens a popup so the unassigned subject card can be updated in place.
+    $actions.append($(`<button type="button" class="btn btn-sm btn-light lesson-card-action-btn lesson-card-edit-btn" title="Edit unassigned lesson"/>`)
+      .append($(`<i class="fas fa-pen"/>`)));
     $actions.append($(`<button type="button" class="btn btn-sm btn-light lesson-card-action-btn lesson-card-remove-btn" title="Remove unassigned lesson"/>`)
       .append($(`<i class="fas fa-trash-can"/>`)));
     $card.append($actions);
@@ -1986,57 +2100,124 @@ function getLessonEndTimeString(startTimeslot, lesson) {
     .format(dateTimeFormatter);
 }
 
+/** Compact lesson label for one export timetable cell (matches on-page card info). */
+function formatExportLessonCellText(lesson, mode) {
+  const roomLabel = getLessonRoomLabel(lesson);
+  const parts = [lesson.subject];
+  if (mode === ENTITY_VIEW_ROOM) {
+    parts.push("by " + lesson.teacher);
+    parts.push(lesson.studentGroup);
+  } else if (mode === ENTITY_VIEW_TEACHER) {
+    parts.push(lesson.studentGroup);
+    if (roomLabel != null) {
+      parts.push(roomLabel);
+    }
+  } else {
+    parts.push("by " + lesson.teacher);
+    if (roomLabel != null) {
+      parts.push(roomLabel);
+    }
+  }
+  return parts.filter(part => part != null && part !== "").join(" | ");
+}
+
+/** Map key for one weekday × time-row cell in the export timetable spreadsheet. */
+function makeExportTimetableCellKey(dayOfWeek, startTime) {
+  return dayOfWeek + "|" + startTime;
+}
+
 /**
- * Builds spreadsheet rows for all assigned lessons matching the current export mode.
- * Columns: Entity, Day, Start, End, Subject, Teacher, Group, Room.
+ * Builds spreadsheet rows as weekly timetable grids (Time × Mon–Fri), one block per entity.
+ * Matches the Export webpage layout; entities are separated by a blank row.
  */
 function buildExportSpreadsheetRows(timetable, mode) {
-  const header = ["Entity", "Day", "Start", "End", "Subject", "Teacher", "Group", "Room"];
-  const rows = [header];
-  if (timetable == null || timetable.lessons == null) {
+  const rows = [];
+  if (timetable == null || timetable.timeslots == null || timetable.timeslots.length === 0) {
     return rows;
   }
 
+  const weekdays = getUniqueWeekdaysFromTimetable(timetable);
+  const timeRows = getUniqueTimeRowsFromTimetable(timetable);
   const entities = listExportEntities(timetable, mode);
-  const entityByKey = new Map(entities.map(entity => [entity.key, entity.label]));
+  if (weekdays.length === 0 || timeRows.length === 0 || entities.length === 0) {
+    return rows;
+  }
 
-  for (const lesson of timetable.lessons) {
-    if (lesson.timeslot == null || lesson.room == null) {
-      continue;
+  for (const entity of entities) {
+    // Blank separator between entity timetable blocks
+    if (rows.length > 0) {
+      rows.push([]);
     }
-    const timeslot = timeslotMap.get(extractId(lesson.timeslot));
-    const room = roomMap.get(extractId(lesson.room));
-    if (timeslot == null) {
-      continue;
+    // Entity title (same as the card heading on the webpage)
+    rows.push([entity.label]);
+    // Header row: Time + weekday columns
+    rows.push(["Time"].concat(weekdays.map(formatWeekdayColumnLabel)));
+
+    // cellKey -> list of cell text fragments (lessons / ECA)
+    const cellTexts = new Map();
+
+    const addCellText = function (dayOfWeek, startTime, text) {
+      if (dayOfWeek == null || startTime == null || text == null || text === "") {
+        return;
+      }
+      const key = makeExportTimetableCellKey(dayOfWeek, startTime);
+      if (!cellTexts.has(key)) {
+        cellTexts.set(key, []);
+      }
+      const list = cellTexts.get(key);
+      if (!list.includes(text)) {
+        list.push(text);
+      }
+    };
+
+    // Place lessons into every occupied timeslot cell (mirrors spanning cards on the grid)
+    for (const lesson of timetable.lessons) {
+      if (lesson.timeslot == null || lesson.room == null) {
+        continue;
+      }
+      if (!lessonMatchesWeekdayEntity(lesson, mode, entity.key)) {
+        continue;
+      }
+      const startTimeslot = timeslotMap.get(extractId(lesson.timeslot));
+      if (startTimeslot == null) {
+        continue;
+      }
+      const label = formatExportLessonCellText(lesson, mode);
+      for (const timeslotId of getOccupiedTimeslotIds(timetable, startTimeslot, lesson)) {
+        const occupied = timeslotMap.get(timeslotId);
+        if (occupied != null) {
+          addCellText(occupied.dayOfWeek, occupied.startTime, label);
+        }
+      }
     }
 
-    let entityKey = null;
-    if (mode === ENTITY_VIEW_ROOM) {
-      entityKey = room != null ? room.id : null;
-    } else if (mode === ENTITY_VIEW_TEACHER) {
-      entityKey = lesson.teacher;
-    } else if (mode === ENTITY_VIEW_STUDENT_GROUP) {
-      entityKey = lesson.studentGroup;
-    }
-    if (entityKey == null || !entityByKey.has(entityKey)) {
-      continue;
+    // ECA blocks appear on weekday grids for every entity (same as the webpage)
+    if (timetable.ecaBlocks != null) {
+      for (const block of timetable.ecaBlocks) {
+        const ecaLabel = "ECA: " + (block.label || "ECA");
+        for (const timeslotId of block.timeslotIds || []) {
+          const timeslot = timeslotMap.get(timeslotId);
+          if (timeslot != null) {
+            addCellText(timeslot.dayOfWeek, timeslot.startTime, ecaLabel);
+          }
+        }
+      }
     }
 
-    rows.push([
-      entityByKey.get(entityKey),
-      formatWeekdayColumnLabel(timeslot.dayOfWeek),
-      timeslot.startTime,
-      getLessonEndTimeString(timeslot, lesson),
-      lesson.subject,
-      lesson.teacher,
-      lesson.studentGroup,
-      room != null ? room.name : ""
-    ]);
+    // One spreadsheet row per time-of-day row
+    for (const timeRow of timeRows) {
+      const row = [formatTimeRowLabel(timeRow)];
+      for (const dayOfWeek of weekdays) {
+        const texts = cellTexts.get(makeExportTimetableCellKey(dayOfWeek, timeRow.startTime)) || [];
+        row.push(texts.join(" / "));
+      }
+      rows.push(row);
+    }
   }
   return rows;
 }
 
-/** Downloads all lessons for the current export mode as CSV. */
+/** Downloads all entity timetables for the current export mode as CSV (grid layout). */
 function downloadExportCsv() {
   if (loadedSchedule == null) {
     alert("No timetable loaded.");
@@ -2048,7 +2229,7 @@ function downloadExportCsv() {
   downloadBlobFile(new Blob([csv], { type: "text/csv;charset=utf-8" }), filename);
 }
 
-/** Downloads all lessons for the current export mode as an Excel workbook (.xlsx). */
+/** Downloads all entity timetables for the current export mode as an Excel workbook (.xlsx). */
 function downloadExportExcel() {
   if (loadedSchedule == null) {
     alert("No timetable loaded.");
@@ -2906,6 +3087,249 @@ function removeUnassignedLesson(lessonId) {
   renderSchedule(loadedSchedule);
 }
 
+/** Lesson ID currently shown in the unassigned-card edit popup. */
+let editingUnassignedLessonId = null;
+
+/** Bootstrap modal instance for editing an unassigned subject card. */
+let editLessonCardModal = null;
+
+/** Binds the unassigned-card edit popup form. */
+function initEditLessonCardModal() {
+  const modalElement = document.getElementById("editLessonCardModal");
+  if (modalElement == null) {
+    return;
+  }
+  editLessonCardModal = new bootstrap.Modal(modalElement);
+  $("#editLessonCardForm").submit(function (event) {
+    event.preventDefault();
+    saveEditedLessonCard();
+  });
+  $(modalElement).on("hidden.bs.modal", function () {
+    editingUnassignedLessonId = null;
+  });
+}
+
+/** Short weekday label for compact checkboxes, e.g. "Mon". */
+function formatWeekdayShortLabel(dayOfWeek) {
+  return formatWeekdayColumnLabel(dayOfWeek).slice(0, 3);
+}
+
+/** Builds Mon–Fri preferred-weekday checkboxes for the edit popup. */
+function fillEditLessonPreferredWeekdays(selectedDays) {
+  const selected = new Set(selectedDays || []);
+  const $container = $("#editLessonPreferredWeekdays").empty();
+  for (const dayOfWeek of WEEKDAY_COLUMN_ORDER) {
+    const checkboxId = "editLessonWeekday_" + dayOfWeek;
+    const $item = $(`<div class="form-check"/>`);
+    $item.append($(`<input class="form-check-input" type="checkbox"/>`)
+      .attr("id", checkboxId)
+      .attr("value", dayOfWeek)
+      .prop("checked", selected.has(dayOfWeek)));
+    $item.append($(`<label class="form-check-label"/>`)
+      .attr("for", checkboxId)
+      .text(formatWeekdayShortLabel(dayOfWeek)));
+    $container.append($item);
+  }
+}
+
+/** Builds eligible-classroom checkboxes from rooms on the loaded timetable. */
+function fillEditLessonRoomCheckboxes(lesson) {
+  const $container = $("#editLessonRoomCheckboxes").empty();
+  const rooms = loadedSchedule?.rooms || [];
+  if (rooms.length === 0) {
+    $container.append($(`<div class="text-muted small"/>`).text("No classrooms in this timetable."));
+    return;
+  }
+  const allowedIds = lesson.allowedRoomIds || [];
+  // Empty allowedRoomIds means every room is eligible.
+  const checkAll = allowedIds.length === 0;
+  const allowedSet = new Set(allowedIds);
+  for (const room of rooms) {
+    const roomId = extractId(room);
+    const roomName = room.name || String(roomId);
+    const checkboxId = "editLessonRoom_" + convertToId(String(roomId));
+    const $item = $(`<div class="form-check"/>`);
+    $item.append($(`<input class="form-check-input" type="checkbox"/>`)
+      .attr("id", checkboxId)
+      .attr("value", roomId)
+      .prop("checked", checkAll || allowedSet.has(roomId)));
+    $item.append($(`<label class="form-check-label"/>`)
+      .attr("for", checkboxId)
+      .text(roomName));
+    $container.append($item);
+  }
+}
+
+/** Builds parallel-subject checkboxes for every other lesson in the timetable. */
+function fillEditLessonParallelCheckboxes(lesson) {
+  const $container = $("#editLessonParallelCheckboxes").empty();
+  const others = (loadedSchedule?.lessons || []).filter(item => item.id !== lesson.id);
+  if (others.length === 0) {
+    $container.append($(`<div class="text-muted small"/>`).text("No other subject cards to link."));
+    return;
+  }
+  const linkedIds = new Set(lesson.parallelCardIds || []);
+  for (const other of others) {
+    const checkboxId = "editLessonParallel_" + convertToId(String(other.id));
+    const label = other.subject + " — " + other.studentGroup + " (" + other.id + ")";
+    const $item = $(`<div class="form-check"/>`);
+    $item.append($(`<input class="form-check-input" type="checkbox"/>`)
+      .attr("id", checkboxId)
+      .attr("value", other.id)
+      .prop("checked", linkedIds.has(other.id)));
+    $item.append($(`<label class="form-check-label"/>`)
+      .attr("for", checkboxId)
+      .text(label));
+    $container.append($item);
+  }
+}
+
+/**
+ * Opens the edit popup for an unassigned subject card.
+ * Assigned lessons cannot be edited through this action.
+ */
+function showEditLessonCardModal(lessonId) {
+  if (loadedSchedule == null) {
+    return;
+  }
+  const lesson = findLessonById(lessonId);
+  if (lesson == null || isLessonAssigned(lesson)) {
+    return;
+  }
+  editingUnassignedLessonId = lessonId;
+  $("#editLessonCardModalLabel").text("Edit subject card — " + lesson.subject + " (" + lesson.id + ")");
+  $("#editLessonSubjectInput").val(lesson.subject || "");
+  $("#editLessonSubjectTypesInput").val((lesson.subjectTypes || []).join(", "));
+  $("#editLessonTeacherInput").val(lesson.teacher || "");
+  $("#editLessonStudentGroupInput").val(lesson.studentGroup || "");
+  $("#editLessonDurationInput").val(getLessonDurationMinutes(lesson));
+  // Missing preferredWeekdays defaults to all weekdays, matching Preparation cards.
+  const preferredDays = lesson.preferredWeekdays == null
+    ? WEEKDAY_COLUMN_ORDER.slice()
+    : lesson.preferredWeekdays;
+  fillEditLessonPreferredWeekdays(preferredDays);
+  fillEditLessonRoomCheckboxes(lesson);
+  fillEditLessonParallelCheckboxes(lesson);
+  refreshCustomLessonCardDatalists(loadedSchedule);
+  if (editLessonCardModal != null) {
+    editLessonCardModal.show();
+  }
+}
+
+/** Copies teacher-unavailable days from another lesson with the same teacher name. */
+function findTeacherUnavailableDays(teacherName, excludeLessonId) {
+  const other = (loadedSchedule?.lessons || []).find(item =>
+    item.id !== excludeLessonId
+    && item.teacher === teacherName
+    && Array.isArray(item.teacherUnavailableDays));
+  return other == null ? [] : other.teacherUnavailableDays.slice();
+}
+
+/**
+ * Keeps parallel-subject links two-way when the edited card's partners change.
+ */
+function syncLessonParallelLinks(lesson, selectedPartnerIds) {
+  const previousIds = lesson.parallelCardIds || [];
+  const nextIds = selectedPartnerIds.slice();
+  for (const oldId of previousIds) {
+    if (nextIds.includes(oldId)) {
+      continue;
+    }
+    const partner = findLessonById(oldId);
+    if (partner != null) {
+      partner.parallelCardIds = (partner.parallelCardIds || []).filter(id => id !== lesson.id);
+    }
+  }
+  for (const newId of nextIds) {
+    const partner = findLessonById(newId);
+    if (partner == null) {
+      continue;
+    }
+    if (partner.parallelCardIds == null) {
+      partner.parallelCardIds = [];
+    }
+    if (!partner.parallelCardIds.includes(lesson.id)) {
+      partner.parallelCardIds.push(lesson.id);
+    }
+  }
+  lesson.parallelCardIds = nextIds;
+}
+
+/**
+ * Applies the edit-popup form to the unassigned lesson and re-renders the Demo UI.
+ */
+function saveEditedLessonCard() {
+  if (loadedSchedule == null || editingUnassignedLessonId == null) {
+    return;
+  }
+  if (isSolverRunning()) {
+    showWarning("Solver is running", "Stop solving before editing subject cards.");
+    return;
+  }
+  const lesson = findLessonById(editingUnassignedLessonId);
+  if (lesson == null || isLessonAssigned(lesson)) {
+    showWarning("Cannot edit", "Only unassigned subject cards can be edited.");
+    return;
+  }
+
+  const subject = $("#editLessonSubjectInput").val().trim();
+  const teacher = $("#editLessonTeacherInput").val().trim();
+  const studentGroup = $("#editLessonStudentGroupInput").val().trim();
+  const subjectTypes = parseCustomLessonSubjectTypes($("#editLessonSubjectTypesInput").val());
+  const durationRaw = $("#editLessonDurationInput").val().trim();
+  const durationInMinutes = durationRaw === "" ? 60 : parseInt(durationRaw, 10);
+  const preferredWeekdays = $("#editLessonPreferredWeekdays input[type='checkbox']:checked")
+    .map(function () { return this.value; })
+    .get();
+  const allowedRoomIds = $("#editLessonRoomCheckboxes input[type='checkbox']:checked")
+    .map(function () { return this.value; })
+    .get();
+  const parallelCardIds = $("#editLessonParallelCheckboxes input[type='checkbox']:checked")
+    .map(function () { return this.value; })
+    .get();
+
+  if (!subject) {
+    showWarning("Missing subject", "Enter a subject name.");
+    return;
+  }
+  if (!teacher) {
+    showWarning("Missing teacher", "Enter a teacher name.");
+    return;
+  }
+  if (!studentGroup) {
+    showWarning("Missing student group", "Enter a student group.");
+    return;
+  }
+  if (!isValidCustomLessonDurationMinutes(durationInMinutes)) {
+    showWarning("Invalid duration", "Duration must be a positive multiple of " + DEMO_SLOT_MINUTES + " minutes.");
+    return;
+  }
+  if ((loadedSchedule.rooms || []).length > 0 && allowedRoomIds.length === 0) {
+    showWarning("Missing classroom", "Select at least one eligible classroom.");
+    return;
+  }
+
+  const previousTeacher = lesson.teacher;
+  lesson.subject = subject;
+  lesson.teacher = teacher;
+  lesson.studentGroup = studentGroup;
+  lesson.durationInMinutes = durationInMinutes;
+  lesson.subjectTypes = subjectTypes;
+  lesson.preferredWeekdays = preferredWeekdays;
+  lesson.allowedRoomIds = allowedRoomIds;
+  // When the teacher identity changes, inherit unavailable days from that teacher's other cards.
+  if (teacher !== previousTeacher) {
+    lesson.teacherUnavailableDays = findTeacherUnavailableDays(teacher, lesson.id);
+  }
+  syncLessonParallelLinks(lesson, parallelCardIds);
+
+  if (editLessonCardModal != null) {
+    editLessonCardModal.hide();
+  }
+  updateScheduleMap(loadedSchedule);
+  renderSchedule(loadedSchedule);
+}
+
 /** True when a lesson may use the given room (respects allowedRoomIds when set). */
 function isValidLessonRoom(lesson, room) {
   if (lesson == null || room == null) {
@@ -3727,10 +4151,12 @@ function renderScoreCalculationHelp() {
   $content.append($("<h5 class=\"mt-1\"/>").text("How to use the system"));
   appendHelpList($content, [
     "Load a timetable from the Data menu (dataset1 or dataset2 demo), from prepared JSON, or by uploading a saved schedule.",
+    "Use the indigo Timetable group to save, load, download, or upload the current timetable project.",
+    "Use the amber Subject cards group to transfer cards to or from the Preparation tab (cache or file).",
     "Optionally enable soft constraints below the timetable and set a weight (1–100) for each checked rule. Higher weight gives that rule more influence.",
     "Click Solve to run the optimizer. The score panel shows Hard and Soft values; green Feasible means hard = 0.",
     "Browse the timetable by room, teacher, or student group. Use View weekday or Apply filter to open schedule tools in a separate window.",
-    "Drag lesson cards from the unassigned sidebar into the timetable grid to assign them manually. Pin a lesson to keep it fixed; use the unassign button to return it to the sidebar.",
+    "Drag lesson cards from the unassigned sidebar into the timetable grid to assign them manually. Use the pencil button on an unassigned card to edit it. Pin a lesson to keep it fixed; use the unassign button to return it to the sidebar.",
     "After solving, red or orange lesson outlines indicate violations — click a highlighted card for details."
   ]);
 
