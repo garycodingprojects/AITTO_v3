@@ -1,0 +1,323 @@
+{
+  "name" : "dataset1",
+  "timeslots" : [ {
+    "id" : "0",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "08:30:00",
+    "endTime" : "09:00:00",
+    "maxConsecutiveMinutesFromStart" : 270
+  }, {
+    "id" : "1",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "09:00:00",
+    "endTime" : "09:30:00",
+    "maxConsecutiveMinutesFromStart" : 240
+  }, {
+    "id" : "2",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "09:30:00",
+    "endTime" : "10:00:00",
+    "maxConsecutiveMinutesFromStart" : 210
+  }, {
+    "id" : "3",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "10:00:00",
+    "endTime" : "10:30:00",
+    "maxConsecutiveMinutesFromStart" : 180
+  }, {
+    "id" : "4",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "10:30:00",
+    "endTime" : "11:00:00",
+    "maxConsecutiveMinutesFromStart" : 150
+  }, {
+    "id" : "5",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "11:00:00",
+    "endTime" : "11:30:00",
+    "maxConsecutiveMinutesFromStart" : 120
+  }, {
+    "id" : "6",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "11:30:00",
+    "endTime" : "12:00:00",
+    "maxConsecutiveMinutesFromStart" : 90
+  }, {
+    "id" : "7",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "12:00:00",
+    "endTime" : "12:30:00",
+    "maxConsecutiveMinutesFromStart" : 60
+  }, {
+    "id" : "8",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "12:30:00",
+    "endTime" : "13:00:00",
+    "maxConsecutiveMinutesFromStart" : 30
+  }, {
+    "id" : "9",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "13:00:00",
+    "endTime" : "13:30:00",
+    "maxConsecutiveMinutesFromStart" : 0
+  }, {
+    "id" : "10",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "13:30:00",
+    "endTime" : "14:00:00",
+    "maxConsecutiveMinutesFromStart" : 240
+  }, {
+    "id" : "11",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "14:00:00",
+    "endTime" : "14:30:00",
+    "maxConsecutiveMinutesFromStart" : 210
+  }, {
+    "id" : "12",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "14:30:00",
+    "endTime" : "15:00:00",
+    "maxConsecutiveMinutesFromStart" : 180
+  }, {
+    "id" : "13",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "15:00:00",
+    "endTime" : "15:30:00",
+    "maxConsecutiveMinutesFromStart" : 150
+  }, {
+    "id" : "14",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "15:30:00",
+    "endTime" : "16:00:00",
+    "maxConsecutiveMinutesFromStart" : 120
+  }, {
+    "id" : "15",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "16:00:00",
+    "endTime" : "16:30:00",
+    "maxConsecutiveMinutesFromStart" : 90
+  }, {
+    "id" : "16",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "16:30:00",
+    "endTime" : "17:00:00",
+    "maxConsecutiveMinutesFromStart" : 60
+  }, {
+    "id" : "17",
+    "dayOfWeek" : "MONDAY",
+    "startTime" : "17:00:00",
+    "endTime" : "17:30:00",
+    "maxConsecutiveMinutesFromStart" : 30
+  }, {
+    "id" : "18",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "08:30:00",
+    "endTime" : "09:00:00",
+    "maxConsecutiveMinutesFromStart" : 270
+  }, {
+    "id" : "19",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "09:00:00",
+    "endTime" : "09:30:00",
+    "maxConsecutiveMinutesFromStart" : 240
+  }, {
+    "id" : "20",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "09:30:00",
+    "endTime" : "10:00:00",
+    "maxConsecutiveMinutesFromStart" : 210
+  }, {
+    "id" : "21",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "10:00:00",
+    "endTime" : "10:30:00",
+    "maxConsecutiveMinutesFromStart" : 180
+  }, {
+    "id" : "22",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "10:30:00",
+    "endTime" : "11:00:00",
+    "maxConsecutiveMinutesFromStart" : 150
+  }, {
+    "id" : "23",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "11:00:00",
+    "endTime" : "11:30:00",
+    "maxConsecutiveMinutesFromStart" : 120
+  }, {
+    "id" : "24",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "11:30:00",
+    "endTime" : "12:00:00",
+    "maxConsecutiveMinutesFromStart" : 90
+  }, {
+    "id" : "25",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "12:00:00",
+    "endTime" : "12:30:00",
+    "maxConsecutiveMinutesFromStart" : 60
+  }, {
+    "id" : "26",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "12:30:00",
+    "endTime" : "13:00:00",
+    "maxConsecutiveMinutesFromStart" : 30
+  }, {
+    "id" : "27",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "13:00:00",
+    "endTime" : "13:30:00",
+    "maxConsecutiveMinutesFromStart" : 0
+  }, {
+    "id" : "28",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "13:30:00",
+    "endTime" : "14:00:00",
+    "maxConsecutiveMinutesFromStart" : 240
+  }, {
+    "id" : "29",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "14:00:00",
+    "endTime" : "14:30:00",
+    "maxConsecutiveMinutesFromStart" : 210
+  }, {
+    "id" : "30",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "14:30:00",
+    "endTime" : "15:00:00",
+    "maxConsecutiveMinutesFromStart" : 180
+  }, {
+    "id" : "31",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "15:00:00",
+    "endTime" : "15:30:00",
+    "maxConsecutiveMinutesFromStart" : 150
+  }, {
+    "id" : "32",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "15:30:00",
+    "endTime" : "16:00:00",
+    "maxConsecutiveMinutesFromStart" : 120
+  }, {
+    "id" : "33",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "16:00:00",
+    "endTime" : "16:30:00",
+    "maxConsecutiveMinutesFromStart" : 90
+  }, {
+    "id" : "34",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "16:30:00",
+    "endTime" : "17:00:00",
+    "maxConsecutiveMinutesFromStart" : 60
+  }, {
+    "id" : "35",
+    "dayOfWeek" : "TUESDAY",
+    "startTime" : "17:00:00",
+    "endTime" : "17:30:00",
+    "maxConsecutiveMinutesFromStart" : 30
+  } ],
+  "rooms" : [ {
+    "id" : "0",
+    "name" : "Room A",
+    "priority" : 0
+  }, {
+    "id" : "1",
+    "name" : "Room B",
+    "priority" : 0
+  } ],
+  "lessons" : [ {
+    "id" : "0001",
+    "subject" : "Math",
+    "teacher" : "Gary Lam",
+    "studentGroup" : "EG1A",
+    "manualTeacherPlacement" : null,
+    "manualStudentGroupPlacement" : null,
+    "durationInMinutes" : 120,
+    "timeslot" : null,
+    "room" : null,
+    "allowedRoomIds" : null,
+    "violations" : [ ],
+    "pinned" : false,
+    "subjectTypes" : [ "Generic" ],
+    "teacherUnavailableDays" : [ ]
+  }, {
+    "id" : "0002",
+    "subject" : "Math",
+    "teacher" : "Gary Lam",
+    "studentGroup" : "EG1B",
+    "manualTeacherPlacement" : null,
+    "manualStudentGroupPlacement" : null,
+    "durationInMinutes" : 120,
+    "timeslot" : null,
+    "room" : null,
+    "allowedRoomIds" : null,
+    "violations" : [ ],
+    "pinned" : false,
+    "subjectTypes" : [ "Generic" ],
+    "teacherUnavailableDays" : [ ]
+  }, {
+    "id" : "0003",
+    "subject" : "English",
+    "teacher" : "Eva Mak",
+    "studentGroup" : "EG1A",
+    "manualTeacherPlacement" : null,
+    "manualStudentGroupPlacement" : null,
+    "durationInMinutes" : 120,
+    "timeslot" : null,
+    "room" : null,
+    "allowedRoomIds" : null,
+    "violations" : [ ],
+    "pinned" : false,
+    "subjectTypes" : [ "Generic" ],
+    "teacherUnavailableDays" : [ "MONDAY", "TUESDAY" ]
+  }, {
+    "id" : "0004",
+    "subject" : "Chinese",
+    "teacher" : "Johnny Kwong",
+    "studentGroup" : "EG1B",
+    "manualTeacherPlacement" : null,
+    "manualStudentGroupPlacement" : null,
+    "durationInMinutes" : 120,
+    "timeslot" : null,
+    "room" : null,
+    "allowedRoomIds" : null,
+    "violations" : [ ],
+    "pinned" : false,
+    "subjectTypes" : [ "Generic" ],
+    "teacherUnavailableDays" : [ ]
+  }, {
+    "id" : "0005",
+    "subject" : "Physics",
+    "teacher" : "Rex Boo",
+    "studentGroup" : "EG1A",
+    "manualTeacherPlacement" : null,
+    "manualStudentGroupPlacement" : null,
+    "durationInMinutes" : 120,
+    "timeslot" : null,
+    "room" : null,
+    "allowedRoomIds" : null,
+    "violations" : [ ],
+    "pinned" : false,
+    "subjectTypes" : [ "Trade" ],
+    "teacherUnavailableDays" : [ ]
+  }, {
+    "id" : "0006",
+    "subject" : "Physics",
+    "teacher" : "Rex Boo",
+    "studentGroup" : "EG1B",
+    "manualTeacherPlacement" : null,
+    "manualStudentGroupPlacement" : null,
+    "durationInMinutes" : 120,
+    "timeslot" : null,
+    "room" : null,
+    "allowedRoomIds" : null,
+    "violations" : [ ],
+    "pinned" : false,
+    "subjectTypes" : [ "Trade" ],
+    "teacherUnavailableDays" : [ ]
+  } ],
+  "score" : null,
+  "solverStatus" : null,
+  "ecaBlocks" : null
+}

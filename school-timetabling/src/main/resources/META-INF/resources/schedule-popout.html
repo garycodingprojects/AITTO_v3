@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Schedule view</title>
+  <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="/webjars/font-awesome/css/all.css"/>
+  <link rel="stylesheet" href="/timetable-shared.css"/>
+  <link rel="icon" href="/logo.png" type="image/png">
+  <style>
+    /* Ensure slot height is defined before grids render in the pop-out window */
+    :root {
+      --timetable-slot-height: 2.75rem;
+    }
+  </style>
+</head>
+<body>
+<header class="schedule-popout-header py-3 mb-3">
+  <div class="container-fluid">
+    <div class="d-flex align-items-center gap-3">
+      <img src="/logo.png" alt="VTC AI Timetabling Utility logo" height="40">
+      <div>
+        <h1 class="h4 mb-0" id="schedulePopoutTitle">Schedule view</h1>
+        <p class="text-muted small mb-0" id="schedulePopoutSubtitle">Updates when the main window solves or reloads data.</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container-fluid pb-4">
+  <div id="schedulePopoutEmpty" class="alert alert-warning d-none" role="alert">
+    No timetable loaded. Open this window from the main Demo UI after loading or solving a timetable.
+  </div>
+
+  <div id="exportPopoutContent" class="d-none">
+    <div class="export-toolbar no-print mb-3">
+      <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+        <span class="fw-semibold me-1">View:</span>
+        <div class="btn-group" role="group" aria-label="Export entity mode">
+          <button type="button" class="btn btn-sm btn-outline-primary export-mode-btn active" data-export-mode="room">Room</button>
+          <button type="button" class="btn btn-sm btn-outline-primary export-mode-btn" data-export-mode="teacher">Teacher</button>
+          <button type="button" class="btn btn-sm btn-outline-primary export-mode-btn" data-export-mode="studentGroup">Student group</button>
+        </div>
+        <span class="fw-semibold ms-2 me-1">Layout:</span>
+        <div class="btn-group" role="group" aria-label="Export column layout">
+          <button type="button" class="btn btn-sm btn-outline-secondary export-columns-btn" data-export-columns="2" title="2 columns by n rows">2 × n</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary export-columns-btn active" data-export-columns="3" title="3 columns by n rows">3 × n</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary export-columns-btn" data-export-columns="4" title="4 columns by n rows">4 × n</button>
+        </div>
+        <span class="fw-semibold ms-2 me-1">Zoom:</span>
+        <div class="btn-group" role="group" aria-label="Export zoom">
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="exportZoomOutButton" title="Zoom out">
+            <i class="fas fa-search-minus" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="exportZoomLabel" disabled style="min-width: 3.5rem;">100%</button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="exportZoomInButton" title="Zoom in">
+            <i class="fas fa-search-plus" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="exportZoomResetButton" title="Reset zoom to 100%">Reset</button>
+        </div>
+      </div>
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <button type="button" class="btn btn-sm btn-primary" id="exportPrintButton" title="Print or save as PDF">
+          <i class="fas fa-print me-1" aria-hidden="true"></i>Print / Save as PDF
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportCsvButton">
+          <i class="fas fa-file-csv me-1" aria-hidden="true"></i>Download CSV
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportExcelButton">
+          <i class="fas fa-file-excel me-1" aria-hidden="true"></i>Download Excel
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportPngZipButton">
+          <i class="fas fa-file-image me-1" aria-hidden="true"></i>Download PNGs (ZIP)
+        </button>
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="exportHtmlButton">
+          <i class="fas fa-file-code me-1" aria-hidden="true"></i>Download HTML
+        </button>
+      </div>
+    </div>
+    <div id="exportTimetableGallery" class="export-timetable-gallery" data-export-columns="3" aria-live="polite"></div>
+  </div>
+
+  <div id="weekdayPopoutContent" class="d-none">
+    <div class="mb-3">
+      <label class="form-label fw-semibold" for="weekdayRoomSelect">Room weekly timetable</label>
+      <select class="form-select form-select-sm mb-2" id="weekdayRoomSelect" style="max-width: 20rem;"></select>
+      <div class="timetable-grid-wrapper" id="timetableByWeekdayRoom"></div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold" for="weekdayTeacherSelect">Teacher weekly timetable</label>
+      <select class="form-select form-select-sm mb-2" id="weekdayTeacherSelect" style="max-width: 20rem;"></select>
+      <div class="timetable-grid-wrapper" id="timetableByWeekdayTeacher"></div>
+    </div>
+    <div>
+      <label class="form-label fw-semibold" for="weekdayStudentGroupSelect">Student group weekly timetable</label>
+      <select class="form-select form-select-sm mb-2" id="weekdayStudentGroupSelect" style="max-width: 20rem;"></select>
+      <div class="timetable-grid-wrapper" id="timetableByWeekdayStudentGroup"></div>
+    </div>
+  </div>
+
+  <div id="filterPopoutContent" class="d-none">
+    <p class="text-muted small mb-2" id="filterModeDescription">
+      Common free: find slots where every selected teacher and student group is free.
+      Replacement: find when potential teachers are free during a target teacher's lessons.
+    </p>
+    <div id="filterControls" class="mb-3">
+      <div class="row g-3 mb-3">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold" for="filterDaySelect">Weekday</label>
+          <select class="form-select form-select-sm" id="filterDaySelect"></select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-semibold" for="filterModeSelect">Filter type</label>
+          <select class="form-select form-select-sm" id="filterModeSelect">
+            <option value="commonFree">Common free</option>
+            <option value="replacement">Replacement</option>
+          </select>
+        </div>
+      </div>
+      <div id="filterCommonFreeControls" class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label fw-semibold" for="filterTeacherSelect">Teachers (Ctrl+click for multiple)</label>
+          <select class="form-select form-select-sm" id="filterTeacherSelect" multiple></select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label fw-semibold" for="filterStudentGroupSelect">Student groups (Ctrl+click for multiple)</label>
+          <select class="form-select form-select-sm" id="filterStudentGroupSelect" multiple></select>
+        </div>
+      </div>
+      <div id="filterReplacementControls" class="row g-3 d-none">
+        <div class="col-md-4">
+          <label class="form-label fw-semibold" for="filterTargetTeacherSelect">Target teacher (sick leave)</label>
+          <select class="form-select form-select-sm" id="filterTargetTeacherSelect"></select>
+        </div>
+        <div class="col-md-8">
+          <label class="form-label fw-semibold" for="filterReplacementTeacherSelect">Potential replacement teachers (Ctrl+click for multiple)</label>
+          <select class="form-select form-select-sm" id="filterReplacementTeacherSelect" multiple></select>
+        </div>
+      </div>
+    </div>
+    <div id="filterSummary" class="alert alert-info py-2 px-3 small mb-2" role="status">
+      Select at least one teacher or student group to find common free time.
+    </div>
+    <div class="timetable-grid-wrapper" id="timetableByFilter"></div>
+  </div>
+</main>
+
+<div class="modal fade" id="lessonViolationModal" tabindex="-1" aria-labelledby="lessonViolationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="lessonViolationModalLabel">Constraint violations</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="lessonViolationModalContent"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Set before app.js loads so pop-out mode can skip the main Demo UI bootstrap.
+  window.SCHEDULE_POPOUT_VIEW = new URLSearchParams(window.location.search).get("view");
+</script>
+<script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="/webjars/js-joda/dist/js-joda.min.js"></script>
+<!-- Export-only libs (SheetJS, html2canvas, JSZip) for Excel / PNG ZIP downloads -->
+<script>
+  (function () {
+    if (window.SCHEDULE_POPOUT_VIEW !== "export") {
+      return;
+    }
+    const libs = [
+      "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js",
+      "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js",
+      "https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"
+    ];
+    for (const src of libs) {
+      const script = document.createElement("script");
+      script.src = src;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+  })();
+</script>
+<script src="/app.js"></script>
+</body>
+</html>

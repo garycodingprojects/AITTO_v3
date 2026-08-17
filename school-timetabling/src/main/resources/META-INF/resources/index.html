@@ -1,0 +1,2064 @@
+<html lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <title>VTC AI Timetabling Utility — 滅絕天地堂</title>
+  <link rel="stylesheet" href="/webjars/bootstrap/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="/webjars/font-awesome/css/all.css"/>
+  <link rel="stylesheet" href="/timetable-shared.css"/>
+  <link rel="icon" href="/logo.png" type="image/png">
+  <style>
+    :root {
+      --ts-violet-1-rgb: #3E00FF;
+      --ts-violet-2-rgb: #3423A6;
+
+      --bs-link-color: var(--ts-violet-1-rgb);
+      --bs-link-hover-color: var(--ts-violet-2-rgb);
+    }
+    .nav-pills {
+      --bs-nav-pills-link-active-bg: var(--ts-violet-1-rgb);
+    }
+
+    /* AI Scheduler: compact toolbar (matches Preparation tab workspace toolbar). */
+    .demo-scheduler-toolbar {
+      background-color: #f8fafc;
+      border-color: #e2e8f0;
+      margin-bottom: 0.75rem;
+    }
+    .demo-scheduler-toolbar .btn-group .btn {
+      min-width: 5.5rem;
+    }
+    .demo-scheduler-toolbar .demo-toolbar-divider {
+      align-self: stretch;
+      width: 1px;
+      min-height: 1.75rem;
+      margin: 0 0.15rem;
+      background-color: #cbd5e1;
+    }
+    /* Subject cards group: labeled and amber-themed to distinguish from timetable actions. */
+    .demo-scheduler-subject-cards-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      padding: 0.35rem 0.5rem;
+      border-radius: 0.375rem;
+      background-color: #fffbeb;
+      border: 1px solid #fcd34d;
+    }
+    .demo-scheduler-group-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #92400e;
+      line-height: 1.1;
+    }
+    /* Amber outline buttons: used for subject-cards actions and the Preparation workspace toolbar. */
+    .btn-outline-subject-cards {
+      color: #92400e;
+      border-color: #f59e0b;
+      background-color: #fffbeb;
+    }
+    .btn-outline-subject-cards:hover,
+    .btn-outline-subject-cards:focus {
+      color: #78350f;
+      background-color: #fef3c7;
+      border-color: #d97706;
+    }
+    /* Indigo outline buttons: AI Scheduler timetable cache actions (Save/Load/Clear). */
+    .btn-outline-scheduler {
+      color: #4338ca;
+      border-color: #818cf8;
+      background-color: #eef2ff;
+    }
+    .btn-outline-scheduler:hover,
+    .btn-outline-scheduler:focus {
+      color: #312e81;
+      background-color: #e0e7ff;
+      border-color: #6366f1;
+    }
+    @media (max-width: 767.98px) {
+      .demo-scheduler-toolbar .demo-toolbar-divider {
+        width: 100%;
+        height: 1px;
+        min-height: 0;
+        margin: 0.15rem 0;
+      }
+    }
+
+    #softConstraintPanel {
+      margin-bottom: 0.75rem;
+    }
+    #softConstraintPanel .soft-constraint-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      padding: 0.25rem 0.35rem;
+      border-radius: 0.375rem;
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      margin-bottom: 0.35rem;
+    }
+    #softConstraintPanel .soft-constraint-check {
+      flex: 1 1 auto;
+      min-width: 0;
+      margin-bottom: 0;
+    }
+    #softConstraintPanel .soft-constraint-check .form-check-label {
+      font-size: 0.9rem;
+      line-height: 1.3;
+    }
+    .soft-constraint-display-label-en {
+      display: block;
+      font-weight: 600;
+    }
+    .soft-constraint-display-label-zh {
+      display: block;
+      font-size: 0.82rem;
+      color: #64748b;
+      margin-top: 0.1rem;
+    }
+    #softConstraintPanel .soft-constraint-weight {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    #softConstraintPanel .soft-constraint-weight-input {
+      width: 4.25rem;
+      text-align: center;
+      font-weight: 600;
+    }
+    #softConstraintPanel .soft-constraint-weight-input:disabled {
+      background-color: #f1f5f9;
+      color: #94a3b8;
+    }
+    #timetableViewPanel {
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    .timetable-view-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    /* Timetable view tab groups: entity views vs schedule/filter views */
+    .timetable-view-tab-group {
+      border-radius: 0.375rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid;
+    }
+    .timetable-view-tab-group-entity {
+      background-color: #f3e8ff;
+      border-color: #d8b4fe;
+    }
+    .timetable-view-tab-group-entity .nav-link {
+      color: #6b21a8;
+    }
+    .timetable-view-tab-group-entity .nav-link:hover {
+      color: #581c87;
+    }
+    .timetable-view-tab-group-entity .nav-link.active {
+      background-color: #7c3aed;
+      color: #ffffff;
+    }
+    .timetable-view-tab-group-schedule {
+      background-color: #e0f2fe;
+      border-color: #7dd3fc;
+    }
+    .timetable-view-tab-group-schedule .nav-link {
+      color: #0c4a6e;
+    }
+    .timetable-view-tab-group-schedule .nav-link:hover {
+      color: #075985;
+    }
+    .timetable-view-tab-group-schedule .nav-link.active {
+      background-color: #0284c7;
+      color: #ffffff;
+    }
+    .timetable-view-tab-group .nav {
+      gap: 0.25rem;
+    }
+
+    /* Solver score: prominent hard/soft breakdown next to Solve controls */
+    #solveButton.btn-solve-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.55rem 1.4rem 0.55rem 0.55rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--ts-violet-1-rgb) 0%, var(--ts-violet-2-rgb) 55%, #5b21b6 100%);
+      box-shadow: 0 4px 16px rgba(62, 0, 255, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+    #solveButton.btn-solve-primary:hover {
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(62, 0, 255, 0.45);
+      filter: brightness(1.06);
+    }
+    #solveButton.btn-solve-primary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(62, 0, 255, 0.3);
+    }
+    #solveButton.btn-solve-primary:focus-visible {
+      outline: 3px solid rgba(62, 0, 255, 0.35);
+      outline-offset: 2px;
+    }
+    #solveButton.btn-solve-primary .solve-btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      font-size: 0.95rem;
+    }
+    /* Reset button: same pill style as Solve, but a warm amber gradient */
+    #resetButton.btn-reset-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      padding: 0.55rem 1.4rem 0.55rem 0.55rem;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+      border: none;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 55%, #c2410c 100%);
+      box-shadow: 0 4px 16px rgba(234, 88, 12, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+    #resetButton.btn-reset-secondary:hover {
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(234, 88, 12, 0.45);
+      filter: brightness(1.06);
+    }
+    #resetButton.btn-reset-secondary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(234, 88, 12, 0.3);
+    }
+    #resetButton.btn-reset-secondary:focus-visible {
+      outline: 3px solid rgba(234, 88, 12, 0.35);
+      outline-offset: 2px;
+    }
+    #resetButton.btn-reset-secondary:disabled {
+      opacity: 0.6;
+      transform: none;
+      filter: none;
+      cursor: not-allowed;
+    }
+    #resetButton.btn-reset-secondary .reset-btn-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+      font-size: 0.95rem;
+    }
+    .score-display {
+      flex: 0 0 auto;
+    }
+    .score-panel {
+      display: inline-flex;
+      align-items: stretch;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      background: #ffffff;
+      border: 2px solid #cbd5e1;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+    }
+    .score-panel-feasible {
+      border-color: #22c55e;
+      box-shadow: 0 2px 14px rgba(34, 197, 94, 0.22);
+    }
+    .score-panel-infeasible {
+      border-color: #ef4444;
+      box-shadow: 0 2px 14px rgba(239, 68, 68, 0.25);
+    }
+    .score-panel-unknown {
+      border-color: #94a3b8;
+    }
+    .score-status {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0.45rem 0.85rem;
+      min-width: 6rem;
+      gap: 0.2rem;
+      text-align: center;
+    }
+    .score-status-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.9;
+    }
+    .score-status-text {
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .score-status-feasible {
+      background: linear-gradient(160deg, #16a34a 0%, #22c55e 55%, #4ade80 100%);
+      color: #ffffff;
+    }
+    .score-status-infeasible {
+      background: linear-gradient(160deg, #b91c1c 0%, #ef4444 55%, #f97316 100%);
+      color: #ffffff;
+    }
+    .score-status-unknown {
+      background: linear-gradient(160deg, #475569 0%, #64748b 100%);
+      color: #ffffff;
+    }
+    .score-status i {
+      font-size: 1.1rem;
+    }
+    .score-metric {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0.35rem 1.1rem;
+      min-width: 5rem;
+      border-left: 1px solid #e2e8f0;
+    }
+    .score-metric-label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #64748b;
+    }
+    .score-metric-value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1.15;
+      font-variant-numeric: tabular-nums;
+    }
+    .score-metric-hint {
+      font-size: 0.62rem;
+      color: #94a3b8;
+      margin-top: 0.1rem;
+    }
+    .score-metric-hard-ok .score-metric-value {
+      color: #15803d;
+    }
+    .score-metric-hard-bad .score-metric-value {
+      color: #dc2626;
+    }
+    .score-metric-soft .score-metric-value {
+      color: #3E00FF;
+    }
+    .score-metric-soft-negative .score-metric-value {
+      color: #c2410c;
+    }
+
+    /* Preparation tab: color-coded section and table headers for quick identification */
+    #preparation .prep-header-subjects {
+      background-color: #dbeafe;
+      color: #1e3a8a;
+      border-bottom: 2px solid #93c5fd;
+    }
+    #preparation .prep-header-classrooms {
+      background-color: #dcfce7;
+      color: #14532d;
+      border-bottom: 2px solid #86efac;
+    }
+    #preparation .prep-header-teachers {
+      background-color: #ffedd5;
+      color: #9a3412;
+      border-bottom: 2px solid #fdba74;
+    }
+    #preparation .prep-header-student-groups {
+      background-color: #f3e8ff;
+      color: #6b21a8;
+      border-bottom: 2px solid #d8b4fe;
+    }
+    #preparation .prep-header-assignments {
+      background-color: #e0f2fe;
+      color: #0c4a6e;
+      border-bottom: 2px solid #7dd3fc;
+    }
+    #preparation .prep-header-cards {
+      background-color: #fef3c7;
+      color: #92400e;
+      border-bottom: 2px solid #fcd34d;
+    }
+    /* Compact toolbar for cache and workspace file actions on the Preparation tab. */
+    #preparation .prep-workspace-toolbar {
+      background-color: #f8fafc;
+      border-color: #e2e8f0;
+    }
+    #preparation .prep-workspace-toolbar .btn-group .btn {
+      min-width: 5.5rem;
+    }
+    #preparation .prep-toolbar-divider {
+      align-self: stretch;
+      width: 1px;
+      min-height: 1.75rem;
+      margin: 0 0.15rem;
+      background-color: #cbd5e1;
+    }
+    #preparation .prep-table thead th {
+      font-weight: 600;
+      text-align: center;
+      vertical-align: middle;
+      border-color: #cbd5e1;
+    }
+    #preparation .prep-th-card-id {
+      background-color: #f1f5f9;
+      color: #334155;
+    }
+    #preparation .prep-th-subject {
+      background-color: #dbeafe;
+      color: #1e3a8a;
+    }
+    #preparation .prep-th-duration {
+      background-color: #fef9c3;
+      color: #854d0e;
+    }
+    #preparation .prep-th-student-group {
+      background-color: #f3e8ff;
+      color: #6b21a8;
+    }
+    #preparation .prep-th-teacher {
+      background-color: #ffedd5;
+      color: #9a3412;
+    }
+    #preparation .prep-th-types {
+      background-color: #e0e7ff;
+      color: #3730a3;
+    }
+    #preparation .prep-th-rooms {
+      background-color: #dcfce7;
+      color: #14532d;
+    }
+    #preparation .prep-th-actions {
+      background-color: #f1f5f9;
+      color: #64748b;
+    }
+    /* Highlight the subject-card row under the cursor for easier scanning. */
+    #preparation .prep-table tbody tr {
+      transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    #preparation .prep-table tbody tr:hover td {
+      background-color: #fff7db;
+    }
+    #preparation .prep-table tbody tr:hover {
+      box-shadow: inset 4px 0 0 #f59e0b;
+    }
+    /* Clickable subject-card column headers show pointer and a subtle hover state. */
+    #preparation .card-table-sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    #preparation .card-table-sortable:hover {
+      filter: brightness(0.95);
+    }
+    #preparation .prep-label-subject {
+      color: #1e3a8a;
+      font-weight: 600;
+    }
+    #preparation .prep-label-duration {
+      color: #854d0e;
+      font-weight: 600;
+    }
+    #preparation .prep-label-student-group {
+      color: #6b21a8;
+      font-weight: 600;
+    }
+    #preparation .prep-label-teacher {
+      color: #9a3412;
+      font-weight: 600;
+    }
+    #preparation .prep-label-rooms {
+      color: #14532d;
+      font-weight: 600;
+    }
+    #preparation .prep-label-assign-groups {
+      color: #6b21a8;
+      font-weight: 600;
+    }
+    #preparation .prep-label-assign-teachers {
+      color: #9a3412;
+      font-weight: 600;
+    }
+    #preparation .prep-label-assign-classrooms {
+      color: #14532d;
+      font-weight: 600;
+    }
+
+    /* Chat to Schedule tab */
+    .chat-messages-panel {
+      flex: 1 1 auto;
+      min-height: 10rem;
+      overflow-y: auto;
+    }
+    .chat-message {
+      margin-bottom: 0;
+      padding: 0.65rem 0.85rem;
+      border-radius: 0.5rem;
+      max-width: 100%;
+    }
+    .chat-message-turn {
+      display: flex;
+      flex-direction: row;
+      align-items: stretch;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      width: 100%;
+    }
+    .chat-messages-panel > .chat-message {
+      margin-bottom: 0.75rem;
+    }
+    .chat-message-turn.chat-visual-active {
+      align-items: flex-start;
+    }
+    .chat-message-col {
+      flex: 1 1 42%;
+      min-width: 0;
+    }
+    .chat-message-turn:not(.chat-visual-active) .chat-message-col {
+      flex: 1 1 100%;
+    }
+    .chat-message-turn:not(.chat-visual-active) .chat-message-assistant {
+      max-width: 95%;
+    }
+    .chat-message-visual-pane {
+      flex: 1 1 58%;
+      min-width: 260px;
+      max-height: 26rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border-color: #c7d2fe !important;
+      box-shadow: 0 2px 10px rgba(99, 102, 241, 0.12);
+    }
+    .chat-message-visual-pane .chat-inline-visual-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-message-visual-pane .chat-inline-metrics {
+      flex-shrink: 0;
+    }
+    .chat-message-visual-pane .chat-inline-content {
+      flex: 1 1 auto;
+      min-height: 0;
+      max-height: none;
+      overflow: auto;
+    }
+    .chat-inline-visual-header {
+      flex-shrink: 0;
+    }
+    @media (max-width: 991.98px) {
+      .chat-message-turn,
+      .chat-message-turn.chat-visual-active {
+        flex-direction: column;
+      }
+      .chat-message-visual-pane {
+        flex: 1 1 auto;
+        width: 100%;
+        max-width: none;
+        max-height: 22rem;
+      }
+    }
+    .chat-message-user {
+      background: #eef2ff;
+      margin-left: auto;
+      border: 1px solid #c7d2fe;
+    }
+    .chat-message-assistant {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+    }
+    .chat-message-role {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #64748b;
+      margin-bottom: 0.25rem;
+    }
+    .chat-message-body {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .chat-attachment {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      border: 1px dashed #cbd5e1;
+      border-radius: 0.375rem;
+      background: #fff;
+    }
+    .chat-attachment-title {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.35rem;
+    }
+    .chat-input-form textarea {
+      resize: vertical;
+      min-height: 3rem;
+    }
+    .chat-composer-shell {
+      position: sticky;
+      top: 0.5rem;
+      z-index: 25;
+      flex-shrink: 0;
+      background: #ffffff;
+      border: 2px solid #6366f1 !important;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.15);
+    }
+    .chat-composer-header {
+      margin-bottom: 0.5rem;
+    }
+    .chat-composer-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #312e81;
+    }
+    .chat-composer-hint {
+      font-size: 0.78rem;
+      color: #64748b;
+      margin-top: 0.5rem;
+      margin-bottom: 0;
+    }
+    .chat-input-form .input-group .btn-primary {
+      min-width: 5.5rem;
+      font-weight: 600;
+    }
+    #chatIntroGuideToggle {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .chat-main-layout {
+      min-height: calc(100vh - 13rem);
+    }
+    .chat-main-column {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .chat-visual-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .chat-visual-title {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-right: auto;
+    }
+    .chat-visual-metrics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+    .chat-metric-card {
+      flex: 1 1 8rem;
+      min-width: 7rem;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.375rem;
+      background: #f8fafc;
+    }
+    .chat-metric-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .chat-metric-value {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .chat-visual-content {
+      max-height: 28rem;
+      overflow: auto;
+    }
+    .chat-lesson-table {
+      font-size: 0.85rem;
+    }
+    .chat-lesson-table th {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 1;
+    }
+    .chat-violation-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      padding: 0.1rem 0.35rem;
+      border-radius: 0.25rem;
+      background: #fee2e2;
+      color: #991b1b;
+      margin-right: 0.25rem;
+    }
+    .chat-slot-chip {
+      display: inline-block;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.45rem;
+      margin: 0.15rem;
+      border-radius: 999px;
+      background: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .chat-replacement-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      background: #fff;
+    }
+    .chat-analysis-list {
+      margin: 0;
+      padding-left: 1.1rem;
+      font-size: 0.85rem;
+    }
+    .chat-working-indicator {
+      margin-bottom: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border-radius: 0.5rem;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      max-width: 95%;
+    }
+    .chat-working-indicator-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #92400e;
+      margin-bottom: 0.25rem;
+    }
+    .chat-working-indicator-body {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #78350f;
+      font-size: 0.9rem;
+    }
+    .chat-working-elapsed {
+      font-size: 0.75rem;
+      color: #a16207;
+      margin-top: 0.25rem;
+    }
+    #chatAgentModelBadge {
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    #chatAgentModelBadge:hover,
+    #chatAgentModelBadge:focus {
+      filter: brightness(1.05);
+      outline: 2px solid rgba(13, 110, 253, 0.35);
+      outline-offset: 1px;
+    }
+    .chat-model-provider-card {
+      border: 1px solid #e2e8f0;
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+      background: #fff;
+    }
+    .chat-model-provider-card.active-provider {
+      border-color: #93c5fd;
+      box-shadow: 0 0 0 1px #bfdbfe;
+    }
+
+    /* Chat intro panel: capabilities and example prompts at top of Chat to Schedule tab */
+    .chat-intro-panel {
+      background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+      border-color: #e2e8f0 !important;
+    }
+    .chat-intro-heading h5 {
+      font-weight: 700;
+      color: #1e293b;
+    }
+    .chat-intro-toolbar {
+      flex-shrink: 0;
+    }
+    .chat-intro-capability-card {
+      height: 100%;
+      padding: 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      background: #ffffff;
+    }
+    .chat-intro-capability-icon {
+      width: 1.75rem;
+      height: 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.375rem;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    .chat-intro-capability-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 0.35rem;
+    }
+    .chat-intro-capability-list {
+      margin: 0;
+      padding-left: 1rem;
+      font-size: 0.78rem;
+      color: #64748b;
+      line-height: 1.45;
+    }
+    .chat-intro-capability-list li + li {
+      margin-top: 0.15rem;
+    }
+    .chat-intro-examples {
+      padding-top: 0.85rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    .chat-intro-examples-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #64748b;
+      margin-bottom: 0.5rem;
+    }
+    .chat-intro-example-group + .chat-intro-example-group {
+      margin-top: 0.65rem;
+    }
+    .chat-intro-example-group-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 0.35rem;
+    }
+    .chat-intro-example-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .chat-intro-example-chip {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #334155;
+      cursor: pointer;
+      transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+      text-align: left;
+      line-height: 1.35;
+    }
+    .chat-intro-example-chip:hover,
+    .chat-intro-example-chip:focus {
+      background: #eef2ff;
+      border-color: #a5b4fc;
+      color: #3730a3;
+      outline: none;
+    }
+
+    /* Tutorial: readable step cards and compact numbered instructions. */
+    .tutorial-hero {
+      background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+      border: 1px solid #c7d2fe;
+    }
+    .tutorial-step-number {
+      display: inline-flex;
+      width: 2rem;
+      height: 2rem;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 2rem;
+      border-radius: 50%;
+      background-color: var(--ts-violet-1-rgb);
+      color: #ffffff;
+      font-weight: 700;
+    }
+    .tutorial-step {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-start;
+    }
+    .tutorial-step + .tutorial-step {
+      margin-top: 1rem;
+    }
+    .tutorial-card {
+      height: 100%;
+      border-color: #e2e8f0;
+    }
+    .tutorial-card .card-header {
+      background-color: #f8fafc;
+      font-weight: 700;
+    }
+    .tutorial-label {
+      color: #3730a3;
+      font-weight: 700;
+    }
+    /* Tutorial language toggle: pill button aligned with the hero section. */
+    .tutorial-lang-toggle {
+      border-color: #a5b4fc;
+      color: #3730a3;
+      font-weight: 600;
+    }
+    .tutorial-lang-toggle:hover,
+    .tutorial-lang-toggle:focus {
+      background-color: #eef2ff;
+      border-color: var(--ts-violet-1-rgb);
+      color: var(--ts-violet-1-rgb);
+    }
+    /* Declaration: open-source notice at the end of the tutorial. */
+    .tutorial-declaration {
+      border-color: #fde68a;
+      background-color: #fffbeb;
+    }
+    .tutorial-declaration .card-header {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+    @media (max-width: 991.98px) {
+      #navbarNav {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem 0;
+      }
+      #navbarNav .nav-pills {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+    }
+    /* Parallel view: room + teacher + student group on one screen */
+    .parallel-view {
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: calc(100vh - 16rem);
+    }
+    .parallel-header-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      display: flex;
+      background: #f8f9fa;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .parallel-corner {
+      flex: 0 0 var(--parallel-timeslot-width, 11rem);
+      display: flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      font-weight: 600;
+      position: static;
+      align-self: stretch;
+    }
+    .parallel-header-pane .timetable-grid-header {
+      position: static;
+    }
+    .parallel-header-pane, .parallel-body-pane {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+    .parallel-header-pane {
+      overflow: hidden;
+    }
+    .parallel-body-pane {
+      overflow-x: auto;
+      /* Flip the pane so its horizontal scrollbar renders on top, then flip content back. */
+      transform: rotateX(180deg);
+    }
+    .parallel-body-pane > .timetable-grid {
+      transform: rotateX(180deg);
+    }
+    .parallel-body-row {
+      display: flex;
+    }
+    .parallel-timeslot-col {
+      flex: 0 0 var(--parallel-timeslot-width, 11rem);
+      overflow: hidden;
+    }
+    .parallel-timeslot-col .timetable-grid {
+      min-width: 0;
+      width: 100%;
+    }
+    .parallel-pane-title {
+      flex: 0 0 auto;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      background: #f8f9fa;
+      border: 1px solid #dee2e6;
+      border-bottom: 0;
+    }
+    .parallel-view .timetable-grid {
+      border-left: 0;
+      border-right: 0;
+    }
+  </style>
+  </style>
+</head>
+<body>
+<header class="bg-white shadow">
+  <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg mb-3">
+      <a class="navbar-brand">
+        <img src="/logo.png" alt="VTC AI Timetabling Utility logo" height="56">
+      </a>
+      <a class="navbar-brand d-none d-lg-block">VTC AI Timetabling Utility<br>滅絕天地堂 <span class="text-warning fw-semibold">BETA</span></a>
+      <div class="ms-auto">
+        <div class="d-flex align-items-center" id="navbarNav">
+          <ul class="nav nav-pills">
+            <!-- Main workflow tabs, followed by help and the external event link. -->
+            <li class="nav-item" id="navPreparationItem">
+              <button class="nav-link" id="navPreparation" data-bs-toggle="pill" data-bs-target="#preparation" type="button">Preparation</button>
+            </li>
+            <li class="nav-item active" id="navUIItem">
+              <button class="nav-link active" id="navUI" data-bs-toggle="pill" data-bs-target="#demo" type="button">AI Scheduler</button>
+            </li>
+            <li class="nav-item" id="navChatToScheduleItem">
+              <button class="nav-link" id="navChatToSchedule" data-bs-toggle="pill" data-bs-target="#chatToSchedule" type="button">Timetable Agent</button>
+            </li>
+            <li class="nav-item" id="navTutorialItem">
+              <button class="nav-link" id="navTutorial" data-bs-toggle="pill" data-bs-target="#tutorial" type="button">Tutorial</button>
+            </li>
+            <!-- Keep this as a normal link so it does not change the active application tab. -->
+            <li class="nav-item" id="navAiHackathonItem">
+              <a class="nav-link" id="navAiHackathon" href="https://clt.vtc.edu.hk/aihackathon/"
+                 target="_blank" rel="noopener noreferrer">aiHackathon</a>
+            </li>
+          </ul>
+          <div class="vr mx-2"></div>
+          <div class="dropdown ">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Sample Data
+            </button>
+            <div id="testDataButton" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+<div class="tab-content">
+  <div id="demo" class="tab-pane fade show active container-fluid">
+    <div class="sticky-top d-flex justify-content-center align-items-center" aria-live="polite" aria-atomic="true">
+      <div id="notificationPanel" style="position: absolute; top: .5rem;"></div>
+    </div>
+    <blockquote>Generate the optimal schedule for your teachers and students. <span id="info" class="fw-bold"></span></blockquote>
+
+    <div class="demo-scheduler-toolbar border rounded p-2">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Timetable cache actions">
+          <button id="saveScheduleToCacheButton" type="button" class="btn btn-outline-scheduler" title="Save the current timetable to browser cache">
+            <span class="fas fa-save me-1"></span>Save
+          </button>
+          <button id="loadScheduleFromCacheButton" type="button" class="btn btn-outline-scheduler" title="Load the timetable from browser cache">
+            <span class="fas fa-database me-1"></span>Load
+          </button>
+          <button id="clearSubjectCardsButton" type="button" class="btn btn-outline-scheduler" title="Clear all subject cards from the current timetable">
+            <span class="fas fa-trash me-1"></span>Clear
+          </button>
+        </div>
+        <div class="demo-toolbar-divider" aria-hidden="true"></div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Timetable file actions">
+          <button id="downloadScheduleJsonButton" type="button" class="btn btn-outline-secondary" title="Download the current timetable as JSON">
+            <span class="fas fa-download me-1"></span>Download
+          </button>
+          <button id="uploadScheduleJsonButton" type="button" class="btn btn-outline-secondary" title="Upload a saved timetable JSON file">
+            <span class="fas fa-upload me-1"></span>Upload
+          </button>
+        </div>
+        <div class="demo-toolbar-divider" aria-hidden="true"></div>
+        <div class="demo-scheduler-subject-cards-group">
+          <div class="demo-scheduler-group-label">Subject cards</div>
+          <div class="btn-group btn-group-sm" role="group" aria-label="Load subject cards">
+            <button id="loadPreparedFromCacheButton" type="button" class="btn btn-outline-subject-cards" title="Load subject cards from browser cache (saved on Preparation tab)">
+              <span class="fas fa-layer-group me-1"></span>Cache
+            </button>
+            <button id="loadPreparedFromFileButton" type="button" class="btn btn-outline-subject-cards" title="Load subject cards from a workspace JSON file">
+              <span class="fas fa-file-upload me-1"></span>File
+            </button>
+          </div>
+        </div>
+        <input type="file" id="loadPreparedFromFileInput" accept="application/json,.json" class="d-none"/>
+        <input type="file" id="uploadScheduleJsonInput" accept="application/json,.json" class="d-none"/>
+      </div>
+    </div>
+
+    <div class="mb-2 d-flex flex-wrap align-items-center gap-2">
+      <button id="solveButton" type="button" class="btn btn-solve-primary">
+        <span class="solve-btn-icon" aria-hidden="true"><i class="fas fa-wand-magic-sparkles"></i></span>
+        <span class="solve-btn-text">Solve</span>
+      </button>
+      <button id="resetButton" type="button" class="btn btn-reset-secondary" title="Return all assigned lessons to Unassigned">
+        <span class="reset-btn-icon" aria-hidden="true"><i class="fas fa-rotate-left"></i></span>
+        <span class="reset-btn-text">Reset</span>
+      </button>
+      <button id="stopSolvingButton" type="button" class="btn btn-danger">
+        <span class="fas fa-stop"></span> Stop solving
+      </button>
+      <div id="scoreDisplay" class="score-display" aria-live="polite" aria-label="Solver score">
+        <!-- Filled in by app.js -->
+      </div>
+      <button id="analyzeButton" type="button" class="btn btn-secondary" title="About the system">
+        <span class="fas fa-question"></span>
+      </button>
+    </div>
+    <div id="demoScheduleWorkspace" class="demo-schedule-workspace">
+      <aside id="unassignedSidebar" class="unassigned-sidebar" aria-label="Unassigned lessons">
+        <div class="unassigned-sidebar-header">
+          <h2 class="unassigned-sidebar-title mb-0">Unassigned</h2>
+          <span id="unassignedLessonCount" class="badge rounded-pill bg-secondary">0</span>
+          <button type="button" id="toggleUnassignedSidebarButton" class="btn btn-sm btn-outline-secondary ms-auto unassigned-sidebar-toggle" title="Minimize unassigned lessons" aria-expanded="true" aria-controls="unassignedLessons">
+            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+          </button>
+        </div>
+        <form id="customLessonCardForm" class="custom-lesson-card-form">
+          <div class="custom-lesson-card-form-title">Create card</div>
+          <div class="mb-1">
+            <label class="form-label form-label-sm mb-0" for="customLessonSubjectInput">Subject</label>
+            <input type="text" class="form-control form-control-sm" id="customLessonSubjectInput" list="customLessonSubjectSuggestions" placeholder="Subject name"/>
+          </div>
+          <div class="mb-1">
+            <label class="form-label form-label-sm mb-0" for="customLessonSubjectTypesInput">Type(s)</label>
+            <input type="text" class="form-control form-control-sm" id="customLessonSubjectTypesInput" placeholder="Theory, Practical"/>
+          </div>
+          <div class="mb-1">
+            <label class="form-label form-label-sm mb-0" for="customLessonTeacherInput">Teacher</label>
+            <input type="text" class="form-control form-control-sm" id="customLessonTeacherInput" list="customLessonTeacherSuggestions" placeholder="Teacher name"/>
+          </div>
+          <div class="mb-1">
+            <label class="form-label form-label-sm mb-0" for="customLessonDurationInput">Duration (min)</label>
+            <input type="number" class="form-control form-control-sm" id="customLessonDurationInput" min="30" step="30" placeholder="60"/>
+          </div>
+          <div class="mb-1">
+            <label class="form-label form-label-sm mb-0" for="customLessonStudentGroupInput">Student group</label>
+            <input type="text" class="form-control form-control-sm" id="customLessonStudentGroupInput" list="customLessonStudentGroupSuggestions" placeholder="Group name"/>
+          </div>
+          <button type="button" id="createCustomLessonCardButton" class="btn btn-sm btn-primary w-100 mt-1">Create card</button>
+        </form>
+        <datalist id="customLessonSubjectSuggestions"></datalist>
+        <datalist id="customLessonTeacherSuggestions"></datalist>
+        <datalist id="customLessonStudentGroupSuggestions"></datalist>
+        <div id="unassignedLessons" class="unassigned-lessons-list"></div>
+      </aside>
+      <div id="timetableViewPanel" class="demo-schedule-main border rounded p-2 bg-white">
+      <div id="softConstraintPanel" class="border rounded p-2 bg-light">
+        <div class="fw-semibold mb-1">Soft constraints</div>
+        <p class="text-muted small mb-2">Check a constraint and set its priority weight before solving. Higher weight means stronger influence on the schedule.</p>
+        <div id="softConstraintCheckboxes" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-1">
+          <!-- Filled in by app.js -->
+        </div>
+      </div>
+      <div class="timetable-view-tabs">
+        <div class="timetable-view-tab-group timetable-view-tab-group-entity">
+          <ul class="nav nav-pills" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="byRoomTab" data-bs-toggle="tab"
+                      data-bs-target="#byRoomPanel" type="button" role="tab" aria-controls="byRoomPanel"
+                      aria-selected="true">By room
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="byTeacherTab" data-bs-toggle="tab" data-bs-target="#byTeacher"
+                      type="button" role="tab" aria-controls="byTeacher" aria-selected="false">By teacher
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="byStudentGroupTab" data-bs-toggle="tab"
+                      data-bs-target="#byStudentGroup" type="button" role="tab" aria-controls="byStudentGroup"
+                      aria-selected="false">By student group
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="byParallelTab" data-bs-toggle="tab"
+                      data-bs-target="#byParallel" type="button" role="tab" aria-controls="byParallel"
+                      aria-selected="false">Parallel
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div class="timetable-view-tab-group timetable-view-tab-group-schedule">
+          <ul class="nav nav-pills" role="group" aria-label="Schedule and filter views">
+            <li class="nav-item" role="presentation">
+              <button type="button" class="nav-link" id="byExportTab"
+                      title="Open Export in a new window">
+                Export <i class="fas fa-external-link-alt ms-1 small" aria-hidden="true"></i>
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button type="button" class="nav-link" id="byWeekdayTab"
+                      title="Open View weekday in a new window">
+                View weekday <i class="fas fa-external-link-alt ms-1 small" aria-hidden="true"></i>
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button type="button" class="nav-link" id="byFilterTab"
+                      title="Open Apply filter in a new window">
+                Apply filter <i class="fas fa-external-link-alt ms-1 small" aria-hidden="true"></i>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="byRoomPanel" role="tabpanel" aria-labelledby="byRoomTab">
+          <div class="timetable-grid-wrapper" id="timetableByRoom">
+            <!-- Filled in by app.js -->
+          </div>
+        </div>
+        <div class="tab-pane fade" id="byTeacher" role="tabpanel" aria-labelledby="byTeacherTab">
+          <div class="timetable-grid-wrapper" id="timetableByTeacher">
+            <!-- Filled in by app.js -->
+          </div>
+        </div>
+        <div class="tab-pane fade" id="byStudentGroup" role="tabpanel" aria-labelledby="byStudentGroupTab">
+          <div class="timetable-grid-wrapper" id="timetableByStudentGroup">
+            <!-- Filled in by app.js -->
+          </div>
+        </div>
+        <div class="tab-pane fade" id="byParallel" role="tabpanel" aria-labelledby="byParallelTab">
+          <div class="parallel-view" id="parallelView"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Chat to Schedule tab: AI agent for timetable operations -->
+  <div id="chatToSchedule" class="tab-pane fade container-fluid py-3">
+    <div id="chatNotificationPanel" class="mb-2"></div>
+
+    <!-- Agent intro: capabilities, examples, and session controls -->
+    <div id="chatIntroPanel" class="chat-intro-panel border rounded p-3 mb-3">
+      <div class="chat-intro-header d-flex flex-wrap align-items-start justify-content-between gap-3 mb-3">
+        <div class="chat-intro-heading">
+          <h5 class="mb-1">School timetabling assistant</h5>
+          <p class="text-muted small mb-0">
+            Ask the AI agent to create subject cards, solve timetables, check constraints,
+            view schedules, find common free timeslots, or locate replacement teachers for sick leave.
+          </p>
+        </div>
+        <div class="chat-intro-toolbar">
+          <div class="d-flex align-items-center gap-2 flex-wrap justify-content-md-end mb-2">
+            <button type="button" class="badge bg-secondary border-0" id="chatAgentModelBadge"
+                    title="Click to edit LLM model setup">Model: loading…</button>
+            <span class="badge bg-light text-dark border" id="chatAgentStatusBadge">Agent: checking…</span>
+          </div>
+          <div class="d-flex flex-wrap gap-1 justify-content-md-end">
+            <button type="button" id="chatDownloadRecordButton" class="btn btn-outline-secondary btn-sm" title="Download chat history as JSON">
+              <span class="fas fa-download"></span> Download chat
+            </button>
+            <button type="button" id="chatUploadRecordButton" class="btn btn-outline-secondary btn-sm" title="Upload a previously saved chat record">
+              <span class="fas fa-upload"></span> Upload chat
+            </button>
+            <input type="file" id="chatUploadRecordInput" accept=".json,application/json" class="d-none" aria-hidden="true" />
+            <button type="button" id="chatClearHistoryButton" class="btn btn-outline-secondary btn-sm">
+              <span class="fas fa-trash"></span> Clear chat
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-center mb-2">
+        <button type="button" id="chatIntroGuideToggle" class="btn btn-outline-primary btn-sm"
+                aria-expanded="false" aria-controls="chatIntroGuideBody">
+          <span class="fas fa-chevron-down" id="chatIntroGuideToggleIcon" aria-hidden="true"></span>
+          <span id="chatIntroGuideToggleLabel">Show guide &amp; examples</span>
+        </button>
+      </div>
+
+      <div id="chatIntroGuideBody" class="d-none">
+      <div class="row g-2 g-md-3 chat-intro-capabilities">
+        <div class="col-sm-6 col-lg-3">
+          <div class="chat-intro-capability-card">
+            <div class="chat-intro-capability-icon"><span class="fas fa-play" aria-hidden="true"></span></div>
+            <div class="chat-intro-capability-title">Load &amp; solve</div>
+            <ul class="chat-intro-capability-list">
+              <li>Load demo datasets and run the solver</li>
+              <li>Enable soft constraints in chat before solving</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="chat-intro-capability-card">
+            <div class="chat-intro-capability-icon"><span class="fas fa-chart-bar" aria-hidden="true"></span></div>
+            <div class="chat-intro-capability-title">Analyze</div>
+            <ul class="chat-intro-capability-list">
+              <li>Summarize workload and feasibility</li>
+              <li>Check hard and soft constraint violations</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="chat-intro-capability-card">
+            <div class="chat-intro-capability-icon"><span class="fas fa-calendar-check" aria-hidden="true"></span></div>
+            <div class="chat-intro-capability-title">Free slots</div>
+            <ul class="chat-intro-capability-list">
+              <li>Find times when teachers and groups are all free</li>
+              <li>Filter by weekday and selected parties</li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="chat-intro-capability-card">
+            <div class="chat-intro-capability-icon"><span class="fas fa-user-md" aria-hidden="true"></span></div>
+            <div class="chat-intro-capability-title">Sick leave</div>
+            <ul class="chat-intro-capability-list">
+              <li>Find replacement teachers for absent staff</li>
+              <li>See free windows per timeslot</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-intro-examples">
+        <div class="chat-intro-examples-label">Try an example</div>
+        <div class="chat-intro-example-group">
+          <div class="chat-intro-example-group-title">Solve</div>
+          <div class="chat-intro-example-chips">
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Load dataset1 and solve it">Load dataset1 and solve it</button>
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Enable teacher room stability and solve dataset1">Enable teacher room stability and solve</button>
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Load dataset2 and solve it">Load dataset2 and solve it</button>
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Load dataset1, enable student time efficiency with weight 50, and solve">Student time efficiency (weight 50) and solve</button>
+          </div>
+        </div>
+        <div class="chat-intro-example-group">
+          <div class="chat-intro-example-group-title">Analyze</div>
+          <div class="chat-intro-example-chips">
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Analyze the timetable — which teacher is busiest?">Which teacher is busiest?</button>
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Check constraints">Check constraints</button>
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Summarize the timetable — is it feasible and how many lessons are unassigned?">Feasibility and unassigned lessons</button>
+            <button type="button" class="chat-intro-example-chip" data-chat-example="List soft constraints and show which ones are currently enabled">List enabled soft constraints</button>
+          </div>
+        </div>
+        <div class="chat-intro-example-group">
+          <div class="chat-intro-example-group-title">Planning</div>
+          <div class="chat-intro-example-chips">
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Find common free timeslots for Teacher A and Group B1 on Monday">Common free timeslots on Monday</button>
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Find replacement teachers when Mr Chan is on sick leave on Tuesday">Replacement teachers for sick leave</button>
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Find common free timeslots for Teacher B and Teacher C on Tuesday">Common free times for two teachers</button>
+            <button type="button" class="chat-intro-example-chip" data-chat-example="Find replacement teachers when Teacher A is on sick leave on Wednesday">Replacement options on Wednesday</button>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <div id="chatMainLayout" class="chat-main-layout">
+      <div class="chat-main-column">
+        <div class="chat-composer-shell border rounded p-3 bg-white">
+          <div class="chat-composer-header d-flex align-items-center gap-2">
+            <span class="fas fa-comment-dots text-primary" aria-hidden="true"></span>
+            <label for="chatInputTextarea" class="chat-composer-label">Your message</label>
+          </div>
+          <form id="chatInputForm" class="chat-input-form mb-0">
+            <div class="input-group input-group-lg">
+              <textarea id="chatInputTextarea" class="form-control" rows="2"
+                        placeholder="Ask the agent to load data, solve, analyze, or plan…"
+                        aria-label="Chat message"></textarea>
+              <button type="submit" id="chatSendButton" class="btn btn-primary">
+                <span class="fas fa-paper-plane"></span> Send
+              </button>
+            </div>
+            <p class="chat-composer-hint">
+              Type here or pick an example from the guide above. Click <strong>View in chat</strong> on a result to open timetable or analysis beside that message.
+            </p>
+          </form>
+        </div>
+
+        <div id="chatMessagesPanel" class="chat-messages-panel border rounded p-3 bg-white" aria-live="polite">
+          <!-- Filled in by chat-to-schedule.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preparation tab: data authoring only; does not solve or update Demo UI automatically -->
+  <div id="preparation" class="tab-pane fade container-fluid py-3">
+    <div id="preparationNotificationPanel" class="mb-2"></div>
+    <blockquote>Prepare demo data for the timetable solver. Save setup or full workspace to file or browser cache, then load it into Demo UI when ready.</blockquote>
+
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <label class="form-label" for="preparationNameInput">Dataset name</label>
+        <input type="text" class="form-control" id="preparationNameInput" placeholder="Custom demo data"/>
+      </div>
+      <div class="col-md-8">
+        <label class="form-label">Weekdays (for timeslot grid)</label>
+        <div id="preparationWeekdayCheckboxes" class="d-flex flex-wrap gap-3">
+          <div class="form-check"><input class="form-check-input preparation-weekday" type="checkbox" value="MONDAY" id="weekdayMonday" checked/><label class="form-check-label" for="weekdayMonday">Monday</label></div>
+          <div class="form-check"><input class="form-check-input preparation-weekday" type="checkbox" value="TUESDAY" id="weekdayTuesday" checked/><label class="form-check-label" for="weekdayTuesday">Tuesday</label></div>
+          <div class="form-check"><input class="form-check-input preparation-weekday" type="checkbox" value="WEDNESDAY" id="weekdayWednesday"/><label class="form-check-label" for="weekdayWednesday">Wednesday</label></div>
+          <div class="form-check"><input class="form-check-input preparation-weekday" type="checkbox" value="THURSDAY" id="weekdayThursday"/><label class="form-check-label" for="weekdayThursday">Thursday</label></div>
+          <div class="form-check"><input class="form-check-input preparation-weekday" type="checkbox" value="FRIDAY" id="weekdayFriday"/><label class="form-check-label" for="weekdayFriday">Friday</label></div>
+        </div>
+        <!-- School day bounds for timeslot grid generation (30-minute slots between start and end). -->
+        <div class="row g-2 mt-2 align-items-end">
+          <div class="col-auto">
+            <label class="form-label mb-0" for="preparationSchoolStartInput">School start</label>
+            <input type="time" class="form-control form-control-sm" id="preparationSchoolStartInput" value="08:30" step="1800"/>
+          </div>
+          <div class="col-auto">
+            <label class="form-label mb-0" for="preparationSchoolEndInput">School end</label>
+            <input type="time" class="form-control form-control-sm" id="preparationSchoolEndInput" value="17:30" step="1800"/>
+          </div>
+          <div class="col-auto">
+            <label class="form-label mb-0" for="preparationEcaSelect">ECA</label>
+            <select class="form-select form-select-sm" id="preparationEcaSelect" title="Reserve a weekday AM or PM half-day for ECA">
+              <option value="">None</option>
+              <option value="MONDAY|AM">Monday AM</option>
+              <option value="MONDAY|PM">Monday PM</option>
+              <option value="TUESDAY|AM">Tuesday AM</option>
+              <option value="TUESDAY|PM">Tuesday PM</option>
+              <option value="WEDNESDAY|AM">Wednesday AM</option>
+              <option value="WEDNESDAY|PM">Wednesday PM</option>
+              <option value="THURSDAY|AM">Thursday AM</option>
+              <option value="THURSDAY|PM">Thursday PM</option>
+              <option value="FRIDAY|AM">Friday AM</option>
+              <option value="FRIDAY|PM">Friday PM</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="prep-workspace-toolbar mb-3 border rounded p-2">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <div class="btn-group btn-group-sm" role="group" aria-label="Browser cache actions">
+          <button id="saveToCacheButton" type="button" class="btn btn-outline-subject-cards" title="Save workspace to browser cache"><span class="fas fa-save me-1"></span>Save</button>
+          <button id="loadFromCacheButton" type="button" class="btn btn-outline-subject-cards" title="Load workspace from browser cache"><span class="fas fa-database me-1"></span>Load</button>
+          <button id="clearPreparationCacheButton" type="button" class="btn btn-outline-subject-cards" title="Clear browser cache and reset workspace"><span class="fas fa-trash me-1"></span>Clear</button>
+        </div>
+        <div class="prep-toolbar-divider" aria-hidden="true"></div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Workspace file actions">
+          <button id="downloadWorkspaceButton" type="button" class="btn btn-outline-subject-cards" title="Download workspace JSON"><span class="fas fa-download me-1"></span>Download</button>
+          <button id="uploadWorkspaceButton" type="button" class="btn btn-outline-subject-cards" title="Upload workspace JSON"><span class="fas fa-upload me-1"></span>Upload</button>
+        </div>
+        <input type="file" id="uploadWorkspaceInput" accept="application/json,.json" class="d-none"/>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-lg-3">
+        <div class="card h-100">
+          <div class="card-header fw-semibold prep-header-subjects">Subjects</div>
+          <div class="card-body">
+            <div class="mb-2"><input type="text" class="form-control form-control-sm" id="newSubjectNameInput" placeholder="Subject name"/></div>
+            <div class="mb-2">
+              <label class="form-label small mb-1 prep-label-subject-type-examples">Subject type(s)</label>
+              <div id="newSubjectExampleTypeCheckboxes" class="border rounded p-2 mb-1 small"></div>
+              <input type="text" class="form-control form-control-sm" id="newSubjectCustomTypesInput" placeholder="Other type(s), comma-separated"/>
+            </div>
+            <button id="addSubjectButton" type="button" class="btn btn-sm btn-primary w-100">Add subject</button>
+            <ul id="subjectList" class="list-group list-group-flush mt-2 small"></ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="card h-100">
+          <div class="card-header fw-semibold prep-header-classrooms">Classrooms</div>
+          <div class="card-body">
+            <div class="mb-2"><input type="text" class="form-control form-control-sm" id="newRoomNameInput" placeholder="Room name"/></div>
+            <div class="mb-2"><input type="number" class="form-control form-control-sm" id="newRoomPriorityInput" placeholder="Priority" min="-9999" max="9999" value="0"/></div>
+            <button id="addRoomButton" type="button" class="btn btn-sm btn-primary w-100">Add classroom</button>
+            <table class="table table-sm table-bordered table-striped mt-3">
+              <thead>
+                <tr>
+                  <th class="text-center">Classroom</th>
+                  <th class="text-center" style="width: 100px;">Priority</th>
+                  <th class="text-center" style="width: 50px;"></th>
+                </tr>
+              </thead>
+              <tbody id="roomTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="card h-100">
+          <div class="card-header fw-semibold prep-header-teachers">Teachers</div>
+          <div class="card-body">
+            <div class="mb-2"><input type="text" class="form-control form-control-sm" id="newTeacherNameInput" placeholder="Teacher name"/></div>
+            <button id="addTeacherButton" type="button" class="btn btn-sm btn-primary w-100">Add teacher</button>
+            <table class="table table-sm table-bordered small mt-2">
+              <thead><tr><th>Teacher</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th></tr></thead>
+              <tbody id="teacherListBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3">
+        <div class="card h-100">
+          <div class="card-header fw-semibold prep-header-student-groups">Student groups</div>
+          <div class="card-body">
+            <div class="mb-2"><input type="text" class="form-control form-control-sm" id="newStudentGroupNameInput" placeholder="Group name"/></div>
+            <button id="addStudentGroupButton" type="button" class="btn btn-sm btn-primary w-100">Add student group</button>
+            <ul id="studentGroupList" class="list-group list-group-flush mt-2 small"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header fw-semibold prep-header-assignments">Subject assignments (eligibility mappings)</div>
+      <div class="card-body">
+        <p class="text-muted small mb-3">Select a student group, teacher, or classroom, then check the subjects that apply to that resource.</p>
+        <div class="row g-3" id="assignmentMappingPanel">
+          <div class="col-md-4">
+            <label class="form-label prep-label-assign-groups">Student groups</label>
+            <div id="assignmentStudentGroupList" class="list-group mb-2" style="max-height: 8rem; overflow-y: auto;"></div>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label mb-0">Subjects for selected group</label>
+              <div class="btn-group btn-group-sm" role="group">
+                <button id="assignmentGroupApplyAllButton" type="button" class="btn btn-outline-secondary btn-sm py-0">Apply to all</button>
+                <button id="assignmentGroupClearAllButton" type="button" class="btn btn-outline-secondary btn-sm py-0">Clear all</button>
+              </div>
+            </div>
+            <div id="assignmentSubjectsForGroup" class="border rounded p-2" style="max-height: 10rem; overflow-y: auto;"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label prep-label-assign-teachers">Teachers</label>
+            <div id="assignmentTeacherList" class="list-group mb-2" style="max-height: 8rem; overflow-y: auto;"></div>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label mb-0">Subjects for selected teacher</label>
+              <div class="btn-group btn-group-sm" role="group">
+                <button id="assignmentTeacherApplyAllButton" type="button" class="btn btn-outline-secondary btn-sm py-0">Apply to all</button>
+                <button id="assignmentTeacherClearAllButton" type="button" class="btn btn-outline-secondary btn-sm py-0">Clear all</button>
+              </div>
+            </div>
+            <div id="assignmentSubjectsForTeacher" class="border rounded p-2" style="max-height: 10rem; overflow-y: auto;"></div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label prep-label-assign-classrooms">Classrooms</label>
+            <div id="assignmentRoomList" class="list-group mb-2" style="max-height: 8rem; overflow-y: auto;"></div>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <label class="form-label mb-0">Subjects for selected classroom</label>
+              <div class="btn-group btn-group-sm" role="group">
+                <button id="assignmentRoomApplyAllButton" type="button" class="btn btn-outline-secondary btn-sm py-0">Apply to all</button>
+                <button id="assignmentRoomClearAllButton" type="button" class="btn btn-outline-secondary btn-sm py-0">Clear all</button>
+              </div>
+            </div>
+            <div id="assignmentSubjectsForRoom" class="border rounded p-2" style="max-height: 10rem; overflow-y: auto;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header fw-semibold prep-header-cards">Subject cards (lessons to schedule)</div>
+      <div class="card-body">
+        <div class="row g-2 align-items-end mb-3">
+          <div class="col-md-2">
+            <label class="form-label prep-label-subject" for="cardSubjectSelect">Subject</label>
+            <select class="form-select form-select-sm" id="cardSubjectSelect"></select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label prep-label-duration" for="cardDurationInput">Duration (minutes)</label>
+            <input type="number" class="form-control form-control-sm" id="cardDurationInput" min="30" step="30" placeholder="Minutes"/>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label prep-label-student-group" for="cardStudentGroupSelect">Student group</label>
+            <select class="form-select form-select-sm" id="cardStudentGroupSelect"></select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label prep-label-teacher" for="cardTeacherSelect">Teacher</label>
+            <select class="form-select form-select-sm" id="cardTeacherSelect"></select>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label prep-label-subject-types">Subject type(s)</label>
+            <div id="cardSubjectTypeCheckboxes" class="border rounded p-2 small" style="max-height: 6rem; overflow-y: auto;"></div>
+            <input type="text" class="form-control form-control-sm mt-1 d-none" id="cardSubjectCustomTypesInput" placeholder="Other type(s), comma-separated"/>
+          </div>
+          <div class="col-md-2">
+            <label class="form-label prep-label-rooms">Eligible classrooms</label>
+            <div id="cardRoomCheckboxes" class="border rounded p-2 small" style="max-height: 6rem; overflow-y: auto;"></div>
+          </div>
+          <div class="col-md-2">
+            <button id="addCardButton" type="button" class="btn btn-primary btn-sm w-100 mb-1">Create subject card</button>
+            <button id="cancelCardEditButton" type="button" class="btn btn-outline-secondary btn-sm w-100 d-none">Cancel edit</button>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end mb-2">
+          <button id="generateSubjectCardsButton" type="button" class="btn btn-outline-primary btn-sm">
+            <span class="fas fa-magic"></span> Generate
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-bordered mb-0 prep-table">
+            <thead>
+              <tr id="cardTableHeaderRow">
+                <th class="prep-th-card-id">Card ID</th>
+                <th class="prep-th-subject card-table-sortable" data-sort-key="subjectName" title="Sort by Subject">Subject</th>
+                <th class="prep-th-duration card-table-sortable" data-sort-key="durationInMinutes" title="Sort by Duration">Duration</th>
+                <th class="prep-th-student-group card-table-sortable" data-sort-key="studentGroup" title="Sort by Student group">Student group</th>
+                <th class="prep-th-teacher card-table-sortable" data-sort-key="teacher" title="Sort by Teacher">Teacher</th>
+                <th class="prep-th-types card-table-sortable" data-sort-key="subjectTypes" title="Sort by Types">Types</th>
+                <th class="prep-th-rooms">Eligible rooms</th>
+                <th class="prep-th-actions"></th>
+              </tr>
+            </thead>
+            <tbody id="cardTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tutorial tab: end-user guidance for the complete timetable workflow. -->
+  <div id="tutorial" class="tab-pane fade container-fluid py-3" role="tabpanel" aria-labelledby="navTutorial">
+    <div class="d-flex justify-content-end mb-3">
+      <!-- Switches between English and Traditional Chinese tutorial content. -->
+      <button type="button" id="tutorialLangToggle" class="btn btn-sm btn-outline-primary tutorial-lang-toggle"
+              aria-label="Switch tutorial language">
+        <span class="fas fa-language me-1"></span><span id="tutorialLangToggleLabel">繁體中文</span>
+      </button>
+    </div>
+
+    <!-- English tutorial content (default). -->
+    <div id="tutorialLangEn" class="tutorial-lang-content">
+    <section class="tutorial-hero rounded-3 p-4 mb-4">
+      <div class="row align-items-center g-3">
+        <div class="col-lg-8">
+          <h1 class="h3 mb-2"><span class="fas fa-graduation-cap me-2"></span>How to use VTC AI Timetabling Utility</h1>
+          <p class="mb-0">
+            Follow this guide to try a sample timetable, prepare your own data, generate a schedule,
+            make adjustments, and ask the Timetable Agent for help.
+          </p>
+        </div>
+        <div class="col-lg-4">
+          <div class="alert alert-primary mb-0">
+            <strong>Fastest start:</strong> choose a dataset from <span class="tutorial-label">Sample Data</span>,
+            open <span class="tutorial-label">AI Scheduler</span>, and select <strong>Solve</strong>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="row g-4">
+      <div class="col-xl-6">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-bolt me-2 text-warning"></span>Quick start with sample data</div>
+          <div class="card-body">
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">1</span>
+              <div><strong>Load a sample.</strong> Open <span class="tutorial-label">Sample Data</span> in the top-right corner and choose a dataset.</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">2</span>
+              <div><strong>Review settings.</strong> In <span class="tutorial-label">AI Scheduler</span>, optionally enable soft constraints and set their priority weights.</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">3</span>
+              <div><strong>Generate the timetable.</strong> Select <strong>Solve</strong>. Select <strong>Stop solving</strong> if you need to end the process early.</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">4</span>
+              <div><strong>Inspect the result.</strong> A feasible schedule has no hard-constraint violations. Switch between <strong>By room</strong>, <strong>By teacher</strong>, <strong>By student group</strong>, and <strong>Parallel</strong>.</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-xl-6">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-pencil-ruler me-2 text-primary"></span>Prepare your own data</div>
+          <div class="card-body">
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">1</span>
+              <div><strong>Set up the school week.</strong> In <span class="tutorial-label">Preparation</span>, enter a dataset name, choose weekdays and school hours, and set an ECA period if required.</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">2</span>
+              <div><strong>Add resources.</strong> Create subjects, classrooms, teachers, and student groups.</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">3</span>
+              <div><strong>Define eligibility.</strong> Select which subjects apply to each student group, teacher, and classroom in <strong>Subject assignments</strong>.</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">4</span>
+              <div><strong>Create lessons.</strong> Add subject cards manually or select <strong>Generate</strong> to build them from the assignments.</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">5</span>
+              <div><strong>Move data to the scheduler.</strong> Select <strong>Save</strong> on the Preparation tab, then open AI Scheduler and select <strong>Cache</strong> or <strong>File</strong> in the subject-cards group on the right. Alternatively, download a workspace JSON on Preparation and upload it with <strong>File</strong>.</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-xl-6">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-sliders-h me-2 text-success"></span>Solve, review, and adjust</div>
+          <div class="card-body">
+            <ul class="mb-0">
+              <li class="mb-2"><strong>Soft constraints:</strong> check the preferences you want before solving. A higher weight gives that preference more influence.</li>
+              <li class="mb-2"><strong>Scores:</strong> hard violations must reach zero for a feasible timetable. Use the <strong>?</strong> button for an explanation.</li>
+              <li class="mb-2"><strong>Violation details:</strong> select a highlighted lesson card to see the broken constraint and related lessons.</li>
+              <li class="mb-2"><strong>Manual assignment:</strong> drag a lesson from <strong>Unassigned</strong> into an available timetable slot.</li>
+              <li class="mb-2"><strong>Protect an assignment:</strong> pin a placed lesson so a later solve keeps it in that timeslot. Unpin it when changes are allowed.</li>
+              <li><strong>Remove an assignment:</strong> return a placed lesson to Unassigned, then place it again or solve the timetable.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-xl-6">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-save me-2 text-info"></span>Save and explore the timetable</div>
+          <div class="card-body">
+            <ul class="mb-0">
+              <li class="mb-2">Select <strong>Save</strong> to store the current timetable in browser cache, or <strong>Load</strong> to restore it later.</li>
+              <li class="mb-2">Select <strong>Download</strong> to save the timetable as a JSON file, or <strong>Upload</strong> to restore one.</li>
+              <li class="mb-2">Select <strong>Clear</strong> to remove all subject cards from the current timetable.</li>
+              <li class="mb-2">Use <strong>View weekday</strong> to open a focused day view in a separate window.</li>
+              <li class="mb-2">Use <strong>Apply filter</strong> to find common free periods or explore replacement options.</li>
+              <li>Save a full Preparation workspace when you want to preserve both setup data and subject cards for later editing.</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-12">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-robot me-2 text-primary"></span>Use the Timetable Agent</div>
+          <div class="card-body">
+            <div class="row g-4">
+              <div class="col-lg-8">
+                <ol class="mb-0">
+                  <li class="mb-2">Start the chat-agent service and confirm that the toolbar shows <strong>Agent: online</strong>.</li>
+                  <li class="mb-2">Select the model badge to configure the active LLM provider when required.</li>
+                  <li class="mb-2">Open <strong>Show guide &amp; examples</strong>, choose an example prompt, or type your own request.</li>
+                  <li class="mb-2">Ask the agent to load data, solve a timetable, check constraints, find common free periods, or suggest replacement teachers.</li>
+                  <li>Select <strong>View in chat</strong> to inspect a result, or <strong>Open in Demo UI</strong> to continue editing it in AI Scheduler.</li>
+                </ol>
+              </div>
+              <div class="col-lg-4">
+                <div class="border rounded p-3 bg-light h-100">
+                  <h2 class="h6">Example requests</h2>
+                  <ul class="small mb-0 ps-3">
+                    <li>Load dataset1 and solve it.</li>
+                    <li>Check the timetable for constraint violations.</li>
+                    <li>Find common free timeslots for these teachers.</li>
+                    <li>Find a replacement teacher for Tuesday.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-12">
+        <section class="alert alert-secondary" aria-labelledby="tutorialTroubleshootingTitle">
+          <h2 class="h5" id="tutorialTroubleshootingTitle"><span class="fas fa-tools me-2"></span>Troubleshooting</h2>
+          <ul class="mb-0">
+            <li>If the web page is unavailable, confirm that the timetable backend is running on port <strong>8080</strong>.</li>
+            <li>If the Timetable Agent is offline, start the chat-agent service on port <strong>3001</strong>.</li>
+            <li>If the agent is online but cannot answer, verify the selected LLM provider, model name, server URL, and required API key.</li>
+            <li>If solving cannot continue, check for missing teachers, student groups, eligible classrooms, or invalid lesson durations in Preparation.</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="col-12">
+        <section class="card tutorial-card tutorial-declaration mb-0" aria-labelledby="tutorialDeclarationTitle">
+          <div class="card-header" id="tutorialDeclarationTitle">
+            <span class="fas fa-info-circle me-2"></span>Declaration
+          </div>
+          <div class="card-body">
+            <p class="mb-2">
+              This project was created for <strong>aiHackathon</strong> only. As a hackathon prototype,
+              the system may contain bugs, incomplete features, or unexpected behaviour.
+            </p>
+            <p class="mb-2">
+              We have open-sourced this project on GitHub and welcome everyone to contribute improvements
+              to make the system more reliable and useful.
+            </p>
+            <p class="mb-0">
+              <span class="fas fa-code-branch me-1"></span>
+              <a href="https://github.com/garycodingprojects/AI_Timetable" target="_blank" rel="noopener noreferrer">
+                https://github.com/garycodingprojects/AI_Timetable
+              </a>
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+    </div>
+
+    <!-- Traditional Chinese tutorial content. -->
+    <div id="tutorialLangZh" class="tutorial-lang-content d-none">
+    <section class="tutorial-hero rounded-3 p-4 mb-4">
+      <div class="row align-items-center g-3">
+        <div class="col-lg-8">
+          <h1 class="h3 mb-2"><span class="fas fa-graduation-cap me-2"></span>如何使用 VTC AI 排課工具</h1>
+          <p class="mb-0">
+            按照本指南，您可以試用範例課表、準備自己的資料、產生課表、
+            進行調整，並向 Timetable Agent 尋求協助。
+          </p>
+        </div>
+        <div class="col-lg-4">
+          <div class="alert alert-primary mb-0">
+            <strong>最快開始：</strong>從 <span class="tutorial-label">Sample Data</span> 選擇資料集，
+            開啟 <span class="tutorial-label">AI Scheduler</span>，然後按 <strong>Solve</strong>。
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="row g-4">
+      <div class="col-xl-6">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-bolt me-2 text-warning"></span>使用範例資料快速開始</div>
+          <div class="card-body">
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">1</span>
+              <div><strong>載入範例。</strong>開啟右上角的 <span class="tutorial-label">Sample Data</span> 並選擇資料集。</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">2</span>
+              <div><strong>檢視設定。</strong>在 <span class="tutorial-label">AI Scheduler</span> 中，可選擇啟用軟性限制並設定優先權重。</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">3</span>
+              <div><strong>產生課表。</strong>按 <strong>Solve</strong>。如需提前結束，可按 <strong>Stop solving</strong>。</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">4</span>
+              <div><strong>檢視結果。</strong>可行的課表沒有硬性限制違規。可在 <strong>By room</strong>、<strong>By teacher</strong> 及 <strong>By student group</strong> 之間切換。</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-xl-6">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-pencil-ruler me-2 text-primary"></span>準備您自己的資料</div>
+          <div class="card-body">
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">1</span>
+              <div><strong>設定上課週。</strong>在 <span class="tutorial-label">Preparation</span> 中輸入資料集名稱、選擇上課日及時間，並設定 ECA 時段（如需要）。</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">2</span>
+              <div><strong>新增資源。</strong>建立科目、課室、教師及學生組別。</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">3</span>
+              <div><strong>定義適用範圍。</strong>在 <strong>Subject assignments</strong> 中，為每個學生組別、教師及課室選擇適用的科目。</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">4</span>
+              <div><strong>建立課程。</strong>手動新增科目卡，或按 <strong>Generate</strong> 從設定自動產生。</div>
+            </div>
+            <div class="tutorial-step">
+              <span class="tutorial-step-number">5</span>
+              <div><strong>將資料匯入排課器。</strong>在 Preparation 分頁按 <strong>Save</strong>，然後在 AI Scheduler 右側的 subject cards 群組按 <strong>Cache</strong> 或 <strong>File</strong>。亦可下載 workspace JSON 並以 <strong>File</strong> 載入。</div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-xl-6">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-sliders-h me-2 text-success"></span>求解、檢視及調整</div>
+          <div class="card-body">
+            <ul class="mb-0">
+              <li class="mb-2"><strong>軟性限制：</strong>求解前勾選所需偏好。權重越高，對課表的影響越大。</li>
+              <li class="mb-2"><strong>分數：</strong>硬性違規必須為零才能達成可行課表。按 <strong>?</strong> 按鈕查看說明。</li>
+              <li class="mb-2"><strong>違規詳情：</strong>點選高亮課程卡查看違反的限制及相關課程。</li>
+              <li class="mb-2"><strong>手動分配：</strong>將課程從 <strong>Unassigned</strong> 拖曳至可用時段。</li>
+              <li class="mb-2"><strong>保護分配：</strong>釘選已放置的課程，使後續求解保留該時段。需要更改時取消釘選。</li>
+              <li><strong>移除分配：</strong>將已放置課程退回 Unassigned，再重新放置或求解。</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-xl-6">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-save me-2 text-info"></span>儲存及探索課表</div>
+          <div class="card-body">
+            <ul class="mb-0">
+              <li class="mb-2">按 <strong>Save</strong> 將目前課表存入瀏覽器快取，或按 <strong>Load</strong> 還原。</li>
+              <li class="mb-2">按 <strong>Download</strong> 將課表存成 JSON 檔，或按 <strong>Upload</strong> 還原。</li>
+              <li class="mb-2">按 <strong>Clear</strong> 清除目前課表的所有 subject cards。</li>
+              <li class="mb-2">使用 <strong>View weekday</strong> 在新視窗開啟專注的日視圖。</li>
+              <li class="mb-2">使用 <strong>Apply filter</strong> 尋找共同空堂或探索代課選項。</li>
+              <li>儲存完整的 Preparation workspace 以保留設定資料及科目卡供日後編輯。</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-12">
+        <section class="card tutorial-card">
+          <div class="card-header"><span class="fas fa-robot me-2 text-primary"></span>使用 Timetable Agent</div>
+          <div class="card-body">
+            <div class="row g-4">
+              <div class="col-lg-8">
+                <ol class="mb-0">
+                  <li class="mb-2">啟動 chat-agent 服務，確認工具列顯示 <strong>Agent: online</strong>。</li>
+                  <li class="mb-2">按模型標籤設定所需的 LLM 提供者。</li>
+                  <li class="mb-2">開啟 <strong>Show guide &amp; examples</strong>，選擇範例提示或輸入自己的請求。</li>
+                  <li class="mb-2">請 Agent 載入資料、求解課表、檢查限制、尋找共同空堂或建議代課教師。</li>
+                  <li>按 <strong>View in chat</strong> 檢視結果，或按 <strong>Open in Demo UI</strong> 在 AI Scheduler 繼續編輯。</li>
+                </ol>
+              </div>
+              <div class="col-lg-4">
+                <div class="border rounded p-3 bg-light h-100">
+                  <h2 class="h6">範例請求</h2>
+                  <ul class="small mb-0 ps-3">
+                    <li>Load dataset1 and solve it.</li>
+                    <li>Check the timetable for constraint violations.</li>
+                    <li>Find common free timeslots for these teachers.</li>
+                    <li>Find a replacement teacher for Tuesday.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="col-12">
+        <section class="alert alert-secondary" aria-labelledby="tutorialTroubleshootingTitleZh">
+          <h2 class="h5" id="tutorialTroubleshootingTitleZh"><span class="fas fa-tools me-2"></span>疑難排解</h2>
+          <ul class="mb-0">
+            <li>若網頁無法使用，確認排課後端正在 port <strong>8080</strong> 運行。</li>
+            <li>若 Timetable Agent 離線，在 port <strong>3001</strong> 啟動 chat-agent 服務。</li>
+            <li>若 Agent 在線但無法回應，檢查所選 LLM 提供者、模型名稱、伺服器 URL 及 API 金鑰。</li>
+            <li>若無法繼續求解，檢查 Preparation 中是否缺少教師、學生組別、適用課室或無效的課程時長。</li>
+          </ul>
+        </section>
+      </div>
+
+      <div class="col-12">
+        <section class="card tutorial-card tutorial-declaration mb-0" aria-labelledby="tutorialDeclarationTitleZh">
+          <div class="card-header" id="tutorialDeclarationTitleZh">
+            <span class="fas fa-info-circle me-2"></span>聲明
+          </div>
+          <div class="card-body">
+            <p class="mb-2">
+              本項目僅為 <strong>aiHackathon</strong> 而創建。作為黑客松原型，
+              系統可能包含錯誤、不完整功能或不可預期的行為。
+            </p>
+            <p class="mb-2">
+              我們已將此項目開源，歡迎所有人參與貢獻，共同改進本系統，使其更可靠、更實用。
+            </p>
+            <p class="mb-0">
+              <span class="fas fa-code-branch me-1"></span>
+              <a href="https://github.com/garycodingprojects/AI_Timetable" target="_blank" rel="noopener noreferrer">
+                https://github.com/garycodingprojects/AI_Timetable
+              </a>
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="chatModelConfigModal" tabindex="-1" aria-labelledby="chatModelConfigModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="chatModelConfigModalLabel">LLM model setup</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small">
+          Your LLM settings are stored only in this browser (localStorage). They are sent to the chat-agent
+          with each message but are not saved on the server.
+        </p>
+        <div id="chatModelConfigOfflineAlert" class="alert alert-warning d-none" role="alert">
+          Chat agent is offline — start it with <code>cd chat-agent; npm run dev</code> before sending messages.
+        </div>
+        <div id="chatModelConfigErrorAlert" class="alert alert-danger d-none" role="alert"></div>
+        <div class="mb-3">
+          <label for="chatModelBaseUrl" class="form-label fw-semibold">Base URL</label>
+          <input type="url" id="chatModelBaseUrl" class="form-control" required
+                 placeholder="http://localhost:1234/v1" aria-label="OpenAI-compatible API base URL">
+        </div>
+        <div class="mb-3">
+          <label for="chatModelName" class="form-label fw-semibold">Model id</label>
+          <input type="text" id="chatModelName" class="form-control" required
+                 placeholder="local-model-name" aria-label="Model id">
+        </div>
+        <div class="mb-0">
+          <label for="chatModelApiKey" class="form-label fw-semibold">API key</label>
+          <input type="password" id="chatModelApiKey" class="form-control" autocomplete="off"
+                 placeholder="sk-… or leave blank for local servers" aria-label="LLM API key">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="chatModelConfigSaveButton">
+          <span class="fas fa-save"></span> Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fadebd-example-modal-lg" id="scoreAnalysisModal" tabindex="-1" aria-labelledby="scoreAnalysisModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="scoreAnalysisModalLabel">About the system <span id="scoreAnalysisScoreLabel"></span></h1>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="scoreAnalysisModalContent">
+        <!-- Filled in by app.js -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="lessonViolationModal" tabindex="-1" aria-labelledby="lessonViolationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="lessonViolationModalLabel">Constraint violations</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="lessonViolationModalContent">
+        <!-- Filled in by app.js -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="/webjars/js-joda/dist/js-joda.min.js"></script>
+<script src="/app.js"></script>
+<script src="/preparation.js"></script>
+<script src="/chat-to-schedule.js"></script>
+<script src="/tutorial.js"></script>
+</body>
+</html>

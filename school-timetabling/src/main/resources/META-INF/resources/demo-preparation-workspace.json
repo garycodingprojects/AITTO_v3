@@ -1,0 +1,2357 @@
+{
+  "format": "school-timetabling-preparation-v1",
+  "name": "Custom demo data 1",
+  "weekdays": [
+    "MONDAY",
+    "TUESDAY",
+    "WEDNESDAY",
+    "THURSDAY",
+    "FRIDAY"
+  ],
+  "schoolDay": {
+    "start": "09:00",
+    "end": "17:30"
+  },
+  "eca": {
+    "dayOfWeek": "WEDNESDAY",
+    "period": "PM"
+  },
+  "preparation": {
+    "subjects": [
+      {
+        "name": "Engineering Science",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Apple Chan",
+          "Bill Ng"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "name": "Computer Aided Design in Engineering",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Apple Chan",
+          "Cathy Chang"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "name": "Electrical and Electronics Principles",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Bill Ng",
+          "Cathy Chang"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "name": "Mathematics 1",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Apple Chan",
+          "David Wong",
+          "Eric Yu"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "name": "Mechanical Principles",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Bill Ng",
+          "Cathy Chang"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "name": "Additive Manufacturing Processes",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Eric Yu",
+          "David Wong"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "name": "Chinese 1",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Franky Choi",
+          "Ivan Lam"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "name": "English 1",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Gloria Tang",
+          "Henry Mak"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "name": "English in Action",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Gloria Tang",
+          "Henry Mak"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "name": "Self-Discovery",
+        "types": [],
+        "studentGroups": [
+          "EG1A",
+          "EG1B",
+          "EG1C"
+        ],
+        "teachers": [
+          "Franky Choi"
+        ],
+        "rooms": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      }
+    ],
+    "studentGroups": [
+      "EG1A",
+      "EG1B",
+      "EG1C"
+    ],
+    "teachers": [
+      "Apple Chan",
+      "Bill Ng",
+      "Cathy Chang",
+      "David Wong",
+      "Eric Yu",
+      "Franky Choi",
+      "Gloria Tang",
+      "Henry Mak",
+      "Ivan Lam"
+    ],
+    "rooms": [
+      "A001",
+      "A002",
+      "A003",
+      "B001",
+      "B002"
+    ],
+    "cards": [
+      {
+        "id": "0001",
+        "subjectName": "Engineering Science",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Apple Chan",
+        "subjectTypes": [
+          "Trade"
+        ],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0002",
+        "subjectName": "Computer Aided Design in Engineering",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Apple Chan",
+        "subjectTypes": [
+          "Trade"
+        ],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0003",
+        "subjectName": "Electrical and Electronics Principles",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Bill Ng",
+        "subjectTypes": [
+          "Trade"
+        ],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0004",
+        "subjectName": "Mathematics 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "David Wong",
+        "subjectTypes": [
+          "Generic"
+        ],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0005",
+        "subjectName": "Mechanical Principles",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Bill Ng",
+        "subjectTypes": [
+          "Trade"
+        ],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0006",
+        "subjectName": "Additive Manufacturing Processes",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Eric Yu",
+        "subjectTypes": [
+          "Trade"
+        ],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0007",
+        "subjectName": "Chinese 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Ivan Lam",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0009",
+        "subjectName": "English in Action",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Henry Mak",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0010",
+        "subjectName": "Self-Discovery",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Franky Choi",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0011",
+        "subjectName": "Engineering Science",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Bill Ng",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0012",
+        "subjectName": "Computer Aided Design in Engineering",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Apple Chan",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0013",
+        "subjectName": "Electrical and Electronics Principles",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Bill Ng",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0014",
+        "subjectName": "Mathematics 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Eric Yu",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0015",
+        "subjectName": "Mechanical Principles",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Cathy Chang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0016",
+        "subjectName": "Additive Manufacturing Processes",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Eric Yu",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0017",
+        "subjectName": "Chinese 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Ivan Lam",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0018",
+        "subjectName": "English 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Gloria Tang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0019",
+        "subjectName": "English in Action",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Henry Mak",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0020",
+        "subjectName": "Self-Discovery",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Franky Choi",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0021",
+        "subjectName": "Engineering Science",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Bill Ng",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0022",
+        "subjectName": "Computer Aided Design in Engineering",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Cathy Chang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0023",
+        "subjectName": "Electrical and Electronics Principles",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Cathy Chang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0024",
+        "subjectName": "Mathematics 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Apple Chan",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0025",
+        "subjectName": "Mechanical Principles",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Cathy Chang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0026",
+        "subjectName": "Additive Manufacturing Processes",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "David Wong",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0027",
+        "subjectName": "Chinese 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Franky Choi",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0028",
+        "subjectName": "English 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Gloria Tang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0029",
+        "subjectName": "English in Action",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Henry Mak",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0030",
+        "subjectName": "Self-Discovery",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Franky Choi",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0037",
+        "subjectName": "English 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Henry Mak",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0038",
+        "subjectName": "Engineering Science",
+        "durationInMinutes": 90,
+        "studentGroup": "EG1A",
+        "teacher": "Apple Chan",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0039",
+        "subjectName": "Engineering Science",
+        "durationInMinutes": 90,
+        "studentGroup": "EG1B",
+        "teacher": "Bill Ng",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0040",
+        "subjectName": "Engineering Science",
+        "durationInMinutes": 90,
+        "studentGroup": "EG1C",
+        "teacher": "Bill Ng",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0041",
+        "subjectName": "English 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Gloria Tang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0042",
+        "subjectName": "English 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Gloria Tang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0043",
+        "subjectName": "English 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Henry Mak",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0044",
+        "subjectName": "English 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "Gloria Tang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0045",
+        "subjectName": "English 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Gloria Tang",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0046",
+        "subjectName": "English 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Henry Mak",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0047",
+        "subjectName": "Mathematics 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1A",
+        "teacher": "David Wong",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0048",
+        "subjectName": "Mathematics 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1B",
+        "teacher": "Eric Yu",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0049",
+        "subjectName": "Mathematics 1",
+        "durationInMinutes": 120,
+        "studentGroup": "EG1C",
+        "teacher": "Apple Chan",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "B001",
+          "A003",
+          "B002"
+        ]
+      },
+      {
+        "id": "0050",
+        "subjectName": "Chinese 1",
+        "durationInMinutes": 60,
+        "studentGroup": "EG1A",
+        "teacher": "Ivan Lam",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0051",
+        "subjectName": "Chinese 1",
+        "durationInMinutes": 60,
+        "studentGroup": "EG1B",
+        "teacher": "Ivan Lam",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      },
+      {
+        "id": "0052",
+        "subjectName": "Chinese 1",
+        "durationInMinutes": 60,
+        "studentGroup": "EG1C",
+        "teacher": "Franky Choi",
+        "subjectTypes": [],
+        "roomNames": [
+          "A001",
+          "A002",
+          "A003",
+          "B001",
+          "B002"
+        ]
+      }
+    ]
+  },
+  "timetable": {
+    "name": "Custom demo data 1",
+    "timeslots": [
+      {
+        "id": "0",
+        "dayOfWeek": "MONDAY",
+        "startTime": "09:00:00",
+        "endTime": "09:30:00",
+        "maxConsecutiveMinutesFromStart": 240
+      },
+      {
+        "id": "1",
+        "dayOfWeek": "MONDAY",
+        "startTime": "09:30:00",
+        "endTime": "10:00:00",
+        "maxConsecutiveMinutesFromStart": 210
+      },
+      {
+        "id": "2",
+        "dayOfWeek": "MONDAY",
+        "startTime": "10:00:00",
+        "endTime": "10:30:00",
+        "maxConsecutiveMinutesFromStart": 180
+      },
+      {
+        "id": "3",
+        "dayOfWeek": "MONDAY",
+        "startTime": "10:30:00",
+        "endTime": "11:00:00",
+        "maxConsecutiveMinutesFromStart": 150
+      },
+      {
+        "id": "4",
+        "dayOfWeek": "MONDAY",
+        "startTime": "11:00:00",
+        "endTime": "11:30:00",
+        "maxConsecutiveMinutesFromStart": 120
+      },
+      {
+        "id": "5",
+        "dayOfWeek": "MONDAY",
+        "startTime": "11:30:00",
+        "endTime": "12:00:00",
+        "maxConsecutiveMinutesFromStart": 90
+      },
+      {
+        "id": "6",
+        "dayOfWeek": "MONDAY",
+        "startTime": "12:00:00",
+        "endTime": "12:30:00",
+        "maxConsecutiveMinutesFromStart": 60
+      },
+      {
+        "id": "7",
+        "dayOfWeek": "MONDAY",
+        "startTime": "12:30:00",
+        "endTime": "13:00:00",
+        "maxConsecutiveMinutesFromStart": 30
+      },
+      {
+        "id": "8",
+        "dayOfWeek": "MONDAY",
+        "startTime": "13:00:00",
+        "endTime": "13:30:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "9",
+        "dayOfWeek": "MONDAY",
+        "startTime": "13:30:00",
+        "endTime": "14:00:00",
+        "maxConsecutiveMinutesFromStart": 240
+      },
+      {
+        "id": "10",
+        "dayOfWeek": "MONDAY",
+        "startTime": "14:00:00",
+        "endTime": "14:30:00",
+        "maxConsecutiveMinutesFromStart": 210
+      },
+      {
+        "id": "11",
+        "dayOfWeek": "MONDAY",
+        "startTime": "14:30:00",
+        "endTime": "15:00:00",
+        "maxConsecutiveMinutesFromStart": 180
+      },
+      {
+        "id": "12",
+        "dayOfWeek": "MONDAY",
+        "startTime": "15:00:00",
+        "endTime": "15:30:00",
+        "maxConsecutiveMinutesFromStart": 150
+      },
+      {
+        "id": "13",
+        "dayOfWeek": "MONDAY",
+        "startTime": "15:30:00",
+        "endTime": "16:00:00",
+        "maxConsecutiveMinutesFromStart": 120
+      },
+      {
+        "id": "14",
+        "dayOfWeek": "MONDAY",
+        "startTime": "16:00:00",
+        "endTime": "16:30:00",
+        "maxConsecutiveMinutesFromStart": 90
+      },
+      {
+        "id": "15",
+        "dayOfWeek": "MONDAY",
+        "startTime": "16:30:00",
+        "endTime": "17:00:00",
+        "maxConsecutiveMinutesFromStart": 60
+      },
+      {
+        "id": "16",
+        "dayOfWeek": "MONDAY",
+        "startTime": "17:00:00",
+        "endTime": "17:30:00",
+        "maxConsecutiveMinutesFromStart": 30
+      },
+      {
+        "id": "17",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "09:00:00",
+        "endTime": "09:30:00",
+        "maxConsecutiveMinutesFromStart": 240
+      },
+      {
+        "id": "18",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "09:30:00",
+        "endTime": "10:00:00",
+        "maxConsecutiveMinutesFromStart": 210
+      },
+      {
+        "id": "19",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "10:00:00",
+        "endTime": "10:30:00",
+        "maxConsecutiveMinutesFromStart": 180
+      },
+      {
+        "id": "20",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "10:30:00",
+        "endTime": "11:00:00",
+        "maxConsecutiveMinutesFromStart": 150
+      },
+      {
+        "id": "21",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "11:00:00",
+        "endTime": "11:30:00",
+        "maxConsecutiveMinutesFromStart": 120
+      },
+      {
+        "id": "22",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "11:30:00",
+        "endTime": "12:00:00",
+        "maxConsecutiveMinutesFromStart": 90
+      },
+      {
+        "id": "23",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "12:00:00",
+        "endTime": "12:30:00",
+        "maxConsecutiveMinutesFromStart": 60
+      },
+      {
+        "id": "24",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "12:30:00",
+        "endTime": "13:00:00",
+        "maxConsecutiveMinutesFromStart": 30
+      },
+      {
+        "id": "25",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "13:00:00",
+        "endTime": "13:30:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "26",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "13:30:00",
+        "endTime": "14:00:00",
+        "maxConsecutiveMinutesFromStart": 240
+      },
+      {
+        "id": "27",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "14:00:00",
+        "endTime": "14:30:00",
+        "maxConsecutiveMinutesFromStart": 210
+      },
+      {
+        "id": "28",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "14:30:00",
+        "endTime": "15:00:00",
+        "maxConsecutiveMinutesFromStart": 180
+      },
+      {
+        "id": "29",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "15:00:00",
+        "endTime": "15:30:00",
+        "maxConsecutiveMinutesFromStart": 150
+      },
+      {
+        "id": "30",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "15:30:00",
+        "endTime": "16:00:00",
+        "maxConsecutiveMinutesFromStart": 120
+      },
+      {
+        "id": "31",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "16:00:00",
+        "endTime": "16:30:00",
+        "maxConsecutiveMinutesFromStart": 90
+      },
+      {
+        "id": "32",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "16:30:00",
+        "endTime": "17:00:00",
+        "maxConsecutiveMinutesFromStart": 60
+      },
+      {
+        "id": "33",
+        "dayOfWeek": "TUESDAY",
+        "startTime": "17:00:00",
+        "endTime": "17:30:00",
+        "maxConsecutiveMinutesFromStart": 30
+      },
+      {
+        "id": "34",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "09:00:00",
+        "endTime": "09:30:00",
+        "maxConsecutiveMinutesFromStart": 240
+      },
+      {
+        "id": "35",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "09:30:00",
+        "endTime": "10:00:00",
+        "maxConsecutiveMinutesFromStart": 210
+      },
+      {
+        "id": "36",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "10:00:00",
+        "endTime": "10:30:00",
+        "maxConsecutiveMinutesFromStart": 180
+      },
+      {
+        "id": "37",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "10:30:00",
+        "endTime": "11:00:00",
+        "maxConsecutiveMinutesFromStart": 150
+      },
+      {
+        "id": "38",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "11:00:00",
+        "endTime": "11:30:00",
+        "maxConsecutiveMinutesFromStart": 120
+      },
+      {
+        "id": "39",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "11:30:00",
+        "endTime": "12:00:00",
+        "maxConsecutiveMinutesFromStart": 90
+      },
+      {
+        "id": "40",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "12:00:00",
+        "endTime": "12:30:00",
+        "maxConsecutiveMinutesFromStart": 60
+      },
+      {
+        "id": "41",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "12:30:00",
+        "endTime": "13:00:00",
+        "maxConsecutiveMinutesFromStart": 30
+      },
+      {
+        "id": "42",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "13:00:00",
+        "endTime": "13:30:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "43",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "13:30:00",
+        "endTime": "14:00:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "44",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "14:00:00",
+        "endTime": "14:30:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "45",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "14:30:00",
+        "endTime": "15:00:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "46",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "15:00:00",
+        "endTime": "15:30:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "47",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "15:30:00",
+        "endTime": "16:00:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "48",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "16:00:00",
+        "endTime": "16:30:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "49",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "16:30:00",
+        "endTime": "17:00:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "50",
+        "dayOfWeek": "WEDNESDAY",
+        "startTime": "17:00:00",
+        "endTime": "17:30:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "51",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "09:00:00",
+        "endTime": "09:30:00",
+        "maxConsecutiveMinutesFromStart": 240
+      },
+      {
+        "id": "52",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "09:30:00",
+        "endTime": "10:00:00",
+        "maxConsecutiveMinutesFromStart": 210
+      },
+      {
+        "id": "53",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "10:00:00",
+        "endTime": "10:30:00",
+        "maxConsecutiveMinutesFromStart": 180
+      },
+      {
+        "id": "54",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "10:30:00",
+        "endTime": "11:00:00",
+        "maxConsecutiveMinutesFromStart": 150
+      },
+      {
+        "id": "55",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "11:00:00",
+        "endTime": "11:30:00",
+        "maxConsecutiveMinutesFromStart": 120
+      },
+      {
+        "id": "56",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "11:30:00",
+        "endTime": "12:00:00",
+        "maxConsecutiveMinutesFromStart": 90
+      },
+      {
+        "id": "57",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "12:00:00",
+        "endTime": "12:30:00",
+        "maxConsecutiveMinutesFromStart": 60
+      },
+      {
+        "id": "58",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "12:30:00",
+        "endTime": "13:00:00",
+        "maxConsecutiveMinutesFromStart": 30
+      },
+      {
+        "id": "59",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "13:00:00",
+        "endTime": "13:30:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "60",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "13:30:00",
+        "endTime": "14:00:00",
+        "maxConsecutiveMinutesFromStart": 240
+      },
+      {
+        "id": "61",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "14:00:00",
+        "endTime": "14:30:00",
+        "maxConsecutiveMinutesFromStart": 210
+      },
+      {
+        "id": "62",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "14:30:00",
+        "endTime": "15:00:00",
+        "maxConsecutiveMinutesFromStart": 180
+      },
+      {
+        "id": "63",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "15:00:00",
+        "endTime": "15:30:00",
+        "maxConsecutiveMinutesFromStart": 150
+      },
+      {
+        "id": "64",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "15:30:00",
+        "endTime": "16:00:00",
+        "maxConsecutiveMinutesFromStart": 120
+      },
+      {
+        "id": "65",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "16:00:00",
+        "endTime": "16:30:00",
+        "maxConsecutiveMinutesFromStart": 90
+      },
+      {
+        "id": "66",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "16:30:00",
+        "endTime": "17:00:00",
+        "maxConsecutiveMinutesFromStart": 60
+      },
+      {
+        "id": "67",
+        "dayOfWeek": "THURSDAY",
+        "startTime": "17:00:00",
+        "endTime": "17:30:00",
+        "maxConsecutiveMinutesFromStart": 30
+      },
+      {
+        "id": "68",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "09:00:00",
+        "endTime": "09:30:00",
+        "maxConsecutiveMinutesFromStart": 240
+      },
+      {
+        "id": "69",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "09:30:00",
+        "endTime": "10:00:00",
+        "maxConsecutiveMinutesFromStart": 210
+      },
+      {
+        "id": "70",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "10:00:00",
+        "endTime": "10:30:00",
+        "maxConsecutiveMinutesFromStart": 180
+      },
+      {
+        "id": "71",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "10:30:00",
+        "endTime": "11:00:00",
+        "maxConsecutiveMinutesFromStart": 150
+      },
+      {
+        "id": "72",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "11:00:00",
+        "endTime": "11:30:00",
+        "maxConsecutiveMinutesFromStart": 120
+      },
+      {
+        "id": "73",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "11:30:00",
+        "endTime": "12:00:00",
+        "maxConsecutiveMinutesFromStart": 90
+      },
+      {
+        "id": "74",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "12:00:00",
+        "endTime": "12:30:00",
+        "maxConsecutiveMinutesFromStart": 60
+      },
+      {
+        "id": "75",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "12:30:00",
+        "endTime": "13:00:00",
+        "maxConsecutiveMinutesFromStart": 30
+      },
+      {
+        "id": "76",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "13:00:00",
+        "endTime": "13:30:00",
+        "maxConsecutiveMinutesFromStart": 0
+      },
+      {
+        "id": "77",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "13:30:00",
+        "endTime": "14:00:00",
+        "maxConsecutiveMinutesFromStart": 240
+      },
+      {
+        "id": "78",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "14:00:00",
+        "endTime": "14:30:00",
+        "maxConsecutiveMinutesFromStart": 210
+      },
+      {
+        "id": "79",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "14:30:00",
+        "endTime": "15:00:00",
+        "maxConsecutiveMinutesFromStart": 180
+      },
+      {
+        "id": "80",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "15:00:00",
+        "endTime": "15:30:00",
+        "maxConsecutiveMinutesFromStart": 150
+      },
+      {
+        "id": "81",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "15:30:00",
+        "endTime": "16:00:00",
+        "maxConsecutiveMinutesFromStart": 120
+      },
+      {
+        "id": "82",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "16:00:00",
+        "endTime": "16:30:00",
+        "maxConsecutiveMinutesFromStart": 90
+      },
+      {
+        "id": "83",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "16:30:00",
+        "endTime": "17:00:00",
+        "maxConsecutiveMinutesFromStart": 60
+      },
+      {
+        "id": "84",
+        "dayOfWeek": "FRIDAY",
+        "startTime": "17:00:00",
+        "endTime": "17:30:00",
+        "maxConsecutiveMinutesFromStart": 30
+      }
+    ],
+    "rooms": [
+      {
+        "id": "0",
+        "name": "A001"
+      },
+      {
+        "id": "1",
+        "name": "A002"
+      },
+      {
+        "id": "2",
+        "name": "A003"
+      },
+      {
+        "id": "3",
+        "name": "B001"
+      },
+      {
+        "id": "4",
+        "name": "B002"
+      }
+    ],
+    "lessons": [
+      {
+        "id": "0001",
+        "subject": "Engineering Science",
+        "teacher": "Apple Chan",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [
+          "Trade"
+        ],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0002",
+        "subject": "Computer Aided Design in Engineering",
+        "teacher": "Apple Chan",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [
+          "Trade"
+        ],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0003",
+        "subject": "Electrical and Electronics Principles",
+        "teacher": "Bill Ng",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [
+          "Trade"
+        ],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0004",
+        "subject": "Mathematics 1",
+        "teacher": "David Wong",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [
+          "Generic"
+        ],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0005",
+        "subject": "Mechanical Principles",
+        "teacher": "Bill Ng",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [
+          "Trade"
+        ],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0006",
+        "subject": "Additive Manufacturing Processes",
+        "teacher": "Eric Yu",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [
+          "Trade"
+        ],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0007",
+        "subject": "Chinese 1",
+        "teacher": "Ivan Lam",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0009",
+        "subject": "English in Action",
+        "teacher": "Henry Mak",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0010",
+        "subject": "Self-Discovery",
+        "teacher": "Franky Choi",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0011",
+        "subject": "Engineering Science",
+        "teacher": "Bill Ng",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0012",
+        "subject": "Computer Aided Design in Engineering",
+        "teacher": "Apple Chan",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0013",
+        "subject": "Electrical and Electronics Principles",
+        "teacher": "Bill Ng",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0014",
+        "subject": "Mathematics 1",
+        "teacher": "Eric Yu",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0015",
+        "subject": "Mechanical Principles",
+        "teacher": "Cathy Chang",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0016",
+        "subject": "Additive Manufacturing Processes",
+        "teacher": "Eric Yu",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0017",
+        "subject": "Chinese 1",
+        "teacher": "Ivan Lam",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0018",
+        "subject": "English 1",
+        "teacher": "Gloria Tang",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0019",
+        "subject": "English in Action",
+        "teacher": "Henry Mak",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0020",
+        "subject": "Self-Discovery",
+        "teacher": "Franky Choi",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0021",
+        "subject": "Engineering Science",
+        "teacher": "Bill Ng",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0022",
+        "subject": "Computer Aided Design in Engineering",
+        "teacher": "Cathy Chang",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0023",
+        "subject": "Electrical and Electronics Principles",
+        "teacher": "Cathy Chang",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0024",
+        "subject": "Mathematics 1",
+        "teacher": "Apple Chan",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0025",
+        "subject": "Mechanical Principles",
+        "teacher": "Cathy Chang",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0026",
+        "subject": "Additive Manufacturing Processes",
+        "teacher": "David Wong",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0027",
+        "subject": "Chinese 1",
+        "teacher": "Franky Choi",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0028",
+        "subject": "English 1",
+        "teacher": "Gloria Tang",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0029",
+        "subject": "English in Action",
+        "teacher": "Henry Mak",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0030",
+        "subject": "Self-Discovery",
+        "teacher": "Franky Choi",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0037",
+        "subject": "English 1",
+        "teacher": "Henry Mak",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0038",
+        "subject": "Engineering Science",
+        "teacher": "Apple Chan",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 90,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0039",
+        "subject": "Engineering Science",
+        "teacher": "Bill Ng",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 90,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0040",
+        "subject": "Engineering Science",
+        "teacher": "Bill Ng",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 90,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0041",
+        "subject": "English 1",
+        "teacher": "Gloria Tang",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0042",
+        "subject": "English 1",
+        "teacher": "Gloria Tang",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0043",
+        "subject": "English 1",
+        "teacher": "Henry Mak",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0044",
+        "subject": "English 1",
+        "teacher": "Gloria Tang",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0045",
+        "subject": "English 1",
+        "teacher": "Gloria Tang",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0046",
+        "subject": "English 1",
+        "teacher": "Henry Mak",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0047",
+        "subject": "Mathematics 1",
+        "teacher": "David Wong",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0048",
+        "subject": "Mathematics 1",
+        "teacher": "Eric Yu",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0049",
+        "subject": "Mathematics 1",
+        "teacher": "Apple Chan",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 120,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "3",
+          "2",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0050",
+        "subject": "Chinese 1",
+        "teacher": "Ivan Lam",
+        "studentGroup": "EG1A",
+        "durationInMinutes": 60,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0051",
+        "subject": "Chinese 1",
+        "teacher": "Ivan Lam",
+        "studentGroup": "EG1B",
+        "durationInMinutes": 60,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      },
+      {
+        "id": "0052",
+        "subject": "Chinese 1",
+        "teacher": "Franky Choi",
+        "studentGroup": "EG1C",
+        "durationInMinutes": 60,
+        "subjectTypes": [],
+        "allowedRoomIds": [
+          "0",
+          "1",
+          "2",
+          "3",
+          "4"
+        ],
+        "timeslot": null,
+        "room": null
+      }
+    ],
+    "ecaBlocks": [
+      {
+        "label": "ECA",
+        "dayOfWeek": "WEDNESDAY",
+        "period": "PM",
+        "startTime": "13:30:00",
+        "endTime": "17:30:00",
+        "timeslotIds": [
+          "43",
+          "44",
+          "45",
+          "46",
+          "47",
+          "48",
+          "49",
+          "50"
+        ]
+      }
+    ],
+    "score": null,
+    "solverStatus": null
+  }
+}

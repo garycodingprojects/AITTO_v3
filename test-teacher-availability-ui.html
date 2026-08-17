@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Availability Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Teacher Availability Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        // Mock the preparation functions
+        const TEACHER_AVAILABILITY_DAYS = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY"];
+        
+        function convertToId(str) {
+            return btoa(str).replace(/=/g, "");
+        }
+        
+        function deriveTeacherAvailabilityFromCards(teachers, cards) {
+            const teacherAvailability = {};
+            
+            // Initialize all teachers as available all days
+            for (const teacher of teachers) {
+                teacherAvailability[teacher] = TEACHER_AVAILABILITY_DAYS.slice();
+            }
+            
+            // Collect unavailable days from each card
+            for (const card of cards) {
+                if (!card.teacher || !card.teacherUnavailableDays || card.teacherUnavailableDays.length === 0) {
+                    continue;
+                }
+                
+                const teacher = card.teacher;
+                if (!teacherAvailability[teacher]) {
+                    teacherAvailability[teacher] = TEACHER_AVAILABILITY_DAYS.slice();
+                }
+                
+                // Remove unavailable days from the teacher's available days
+                teacherAvailability[teacher] = teacherAvailability[teacher]
+                    .filter(day => !card.teacherUnavailableDays.includes(day));
+            }
+            
+            return teacherAvailability;
+        }
+        
+        // Load the workspace file
+        fetch('C:\\Users\\kwgar\\Downloads\\preparation-workspace (7).json')
+            .then(response => response.json())
+            .then(data => {
+                const teachers = data.preparation.teachers;
+                const cards = data.preparation.cards;
+                
+                const availability = deriveTeacherAvailabilityFromCards(teachers, cards);
+                
+                let html = '<h2>Teacher Availability Results:</h2><ul>';
+                for (const teacher of teachers) {
+                    const availableDays = availability[teacher];
+                    const isAvailableMonday = availableDays.includes('MONDAY');
+                    const isAvailableTuesday = availableDays.includes('TUESDAY');
+                    
+                    html += `<li><strong>${teacher}:</strong> `;
+                    html += `Monday: ${isAvailableMonday ? 'Available' : 'NOT AVAILABLE'}, `;
+                    html += `Tuesday: ${isAvailableTuesday ? 'Available' : 'NOT AVAILABLE'}`;
+                    html += `</li>`;
+                }
+                html += '</ul>';
+                
+                document.getElementById('results').innerHTML = html;
+            })
+            .catch(error => {
+                document.getElementById('results').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            });
+    </script>
+</body>
+</html>

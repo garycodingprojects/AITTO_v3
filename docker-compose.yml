@@ -1,0 +1,39 @@
+# AITTO — run timetable backend + Timetable Agent together.
+# From repo root: docker compose up --build
+# Browser: http://localhost:8080
+
+services:
+  school-timetabling:
+    build:
+      context: ./school-timetabling
+      dockerfile: Dockerfile
+    container_name: aitto-backend
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/demo-data"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+
+  chat-agent:
+    build:
+      context: ./chat-agent
+      dockerfile: Dockerfile
+    container_name: aitto-chat-agent
+    ports:
+      - "3001:3001"
+    environment:
+      CHAT_AGENT_PORT: "3001"
+      # Internal Docker network URL for the Quarkus API.
+      TIMEFOLD_BASE_URL: http://school-timetabling:8080
+    depends_on:
+      school-timetabling:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "-", "http://localhost:3001/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 15s

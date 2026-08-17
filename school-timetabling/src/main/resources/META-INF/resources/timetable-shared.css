@@ -1,0 +1,522 @@
+/* Shared timetable grid styles for main UI and schedule pop-out windows */
+
+:root {
+  --timetable-slot-height: 2.75rem;
+}
+
+.timetable-grid-wrapper {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
+.timetable-grid {
+  display: grid;
+  /* Gap alone is unreliable once row-spanning cards expand tracks; borders on cells draw lines. */
+  gap: 0;
+  background-color: #dee2e6;
+  border: 1px solid #dee2e6;
+  min-width: fit-content;
+}
+
+.timetable-grid-header {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  padding: 0.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  box-shadow: inset 0 0 0 1px #dee2e6;
+}
+
+.timetable-grid-timeslot-label {
+  background-color: #ffffff;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  min-height: var(--timetable-slot-height);
+  box-shadow: inset 0 0 0 1px #dee2e6;
+}
+
+.timetable-grid-cell {
+  background-color: #ffffff;
+  min-height: var(--timetable-slot-height);
+  box-shadow: inset 0 0 0 1px #dee2e6;
+}
+
+/* Grid item spanning multiple timeslot rows; flex chain fills the spanned area */
+.timetable-lesson {
+  min-height: 0;
+  padding: 0;
+  z-index: 2;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.timetable-lesson-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.timetable-lesson .card {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.timetable-lesson .card-body {
+  overflow: hidden;
+}
+
+.timetable-lesson-truncated .card {
+  outline: 2px dashed #dc3545;
+}
+
+/* Weekday tints for the Timeslot column (Mon–Fri) */
+.timetable-grid-timeslot-label.timeslot-day-monday {
+  background-color: #dbeafe;
+}
+
+.timetable-grid-timeslot-label.timeslot-day-tuesday {
+  background-color: #dcfce7;
+}
+
+.timetable-grid-timeslot-label.timeslot-day-wednesday {
+  background-color: #fef9c3;
+}
+
+.timetable-grid-timeslot-label.timeslot-day-thursday {
+  background-color: #ffedd5;
+}
+
+.timetable-grid-timeslot-label.timeslot-day-friday {
+  background-color: #f3e8ff;
+}
+
+.timetable-grid-timeslot-label.timeslot-lunch-hard {
+  font-weight: 600;
+  outline: 2px dashed #6c757d;
+}
+
+/* ECA half-day block spans all columns in the timetable grid */
+.timetable-eca-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e0e7ff;
+  color: #3730a3;
+  font-weight: 600;
+  border: 2px solid #6366f1;
+  border-radius: 0.25rem;
+  z-index: 1;
+  pointer-events: none;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+/* Lesson cards with constraint violations */
+.timetable-lesson-card-violation {
+  cursor: pointer;
+}
+
+.timetable-lesson-card-violation .card {
+  outline: 3px solid #dc3545;
+  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.25);
+}
+
+.timetable-lesson-card-violation-soft .card {
+  outline: 3px solid #fd7e14;
+  box-shadow: 0 0 0 2px rgba(253, 126, 20, 0.25);
+}
+
+/* By Filter: highlight rows where all selected parties are free */
+.timetable-grid-cell.filter-common-free,
+.timetable-grid-timeslot-label.filter-common-free {
+  background-color: #d1e7dd;
+  outline: 2px solid #198754;
+}
+
+.timetable-grid-header.filter-common-free-header {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+/* By Filter replacement mode: potential teacher free during target lesson times */
+.timetable-grid-cell.filter-replacement-available {
+  background-color: #d1e7dd;
+  outline: 2px solid #198754;
+}
+
+.timetable-grid-header.filter-replacement-header {
+  background-color: #d1e7dd;
+  color: #0f5132;
+}
+
+#filterControls .form-label {
+  margin-bottom: 0.25rem;
+}
+
+#filterTeacherSelect,
+#filterStudentGroupSelect,
+#filterReplacementTeacherSelect {
+  min-height: 8rem;
+}
+
+.lesson-violation-badge {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  font-size: 0.75rem;
+}
+
+/* Pin / unassign controls on placed lesson cards */
+.lesson-card-actions {
+  position: absolute;
+  bottom: 0.25rem;
+  left: 0.25rem;
+  display: flex;
+  gap: 0.15rem;
+  z-index: 3;
+}
+
+/* Remove control on unassigned sidebar cards (top-right corner) */
+.lesson-card-actions-unassigned {
+  top: 0.25rem;
+  right: 0.25rem;
+  bottom: auto;
+  left: auto;
+}
+
+.lesson-card-action-btn {
+  line-height: 1;
+  padding: 0.1rem 0.35rem;
+  opacity: 0.85;
+}
+
+.lesson-card-action-btn:hover {
+  opacity: 1;
+}
+
+.lesson-card-pin-btn.active {
+  color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.lesson-card-remove-btn {
+  color: #842029;
+}
+
+.lesson-card-remove-btn:hover {
+  color: #ffffff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.timetable-lesson-card-pinned .card {
+  outline: 2px solid #0d6efd;
+  box-shadow: 0 0 0 1px rgba(13, 110, 253, 0.25);
+}
+
+/* Entity view drag-and-drop manual scheduling */
+.timetable-lesson-draggable {
+  cursor: grab;
+  /* Placed cards live inside .timetable-lesson; keep the handle grabbable when idle. */
+  pointer-events: auto;
+}
+
+.timetable-lesson-draggable:active {
+  cursor: grabbing;
+}
+
+.timetable-lesson-dragging {
+  opacity: 0.55;
+}
+
+/* During drag, placed cards must not block drops onto underlying grid cells. */
+body.timetable-entity-drag-active:has(.timetable-lesson-dragging) .timetable-lesson {
+  pointer-events: none;
+}
+
+body.timetable-entity-drag-active:has(.timetable-lesson-dragging) .timetable-lesson-draggable:not(.timetable-lesson-dragging) {
+  pointer-events: none;
+}
+
+.timetable-grid-cell.timetable-drop-target {
+  background-color: #fff3cd;
+  outline: 2px dashed #ffc107;
+}
+
+/* Schedule pop-out window shell */
+.schedule-popout-header {
+  background-color: #e0f2fe;
+  border-bottom: 2px solid #7dd3fc;
+}
+
+/* Demo UI: collapsible unassigned-lessons sidebar beside the main timetable */
+.demo-schedule-workspace {
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+  margin-bottom: 1rem;
+}
+
+.demo-schedule-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.unassigned-sidebar {
+  flex: 0 0 20rem;
+  width: 20rem;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  background-color: #ffffff;
+  max-height: calc(200vh - 24rem);
+  transition: width 0.2s ease, flex-basis 0.2s ease;
+}
+
+.unassigned-sidebar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+  flex-shrink: 0;
+}
+
+.unassigned-sidebar-title {
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Compact ad hoc custom lesson card form above the unassigned list */
+.custom-lesson-card-form {
+  flex-shrink: 0;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.custom-lesson-card-form-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: #495057;
+}
+
+.custom-lesson-card-form .form-label-sm {
+  font-size: 0.75rem;
+  color: #6c757d;
+}
+
+.unassigned-lessons-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.unassigned-lesson-item {
+  flex: 0 0 auto;
+}
+
+.unassigned-sidebar-empty {
+  flex: 0 0 auto;
+}
+
+.unassigned-sidebar-empty .alert {
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  padding: 0.5rem 0.75rem;
+}
+
+/* Collapsed rail: icon, count badge, and expand control only */
+.demo-schedule-workspace.unassigned-sidebar-collapsed .unassigned-sidebar {
+  flex: 0 0 3.25rem;
+  width: 3.25rem;
+}
+
+.demo-schedule-workspace.unassigned-sidebar-collapsed .unassigned-sidebar-title,
+.demo-schedule-workspace.unassigned-sidebar-collapsed .custom-lesson-card-form,
+.demo-schedule-workspace.unassigned-sidebar-collapsed .unassigned-lessons-list {
+  display: none;
+}
+
+.demo-schedule-workspace.unassigned-sidebar-collapsed .unassigned-sidebar-header {
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.35rem;
+  padding: 0.5rem 0.25rem;
+  height: 100%;
+}
+
+.demo-schedule-workspace.unassigned-sidebar-collapsed .unassigned-sidebar-toggle {
+  margin-left: 0 !important;
+  margin-top: auto;
+}
+
+@media (max-width: 991.98px) {
+  .demo-schedule-workspace {
+    flex-direction: column;
+  }
+
+  .unassigned-sidebar {
+    width: 100%;
+    flex: 0 0 auto;
+    max-height: 28rem;
+  }
+
+  .demo-schedule-workspace.unassigned-sidebar-collapsed .unassigned-sidebar {
+    width: 100%;
+    flex: 0 0 auto;
+    max-height: 3.25rem;
+  }
+
+  .demo-schedule-workspace.unassigned-sidebar-collapsed .unassigned-sidebar-header {
+    flex-direction: row;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .demo-schedule-workspace.unassigned-sidebar-collapsed .unassigned-sidebar-toggle {
+    margin-top: 0;
+    margin-left: auto !important;
+  }
+}
+
+/* Export pop-out: multi-column gallery of weekday timetables.
+   Fixed card/column widths; page-level horizontal scroll; zoom via CSS zoom. */
+.export-timetable-gallery {
+  --export-card-width: 34rem;
+  display: grid;
+  grid-template-columns: repeat(3, var(--export-card-width));
+  gap: 1rem;
+  align-items: start;
+  width: max-content;
+  min-width: 100%;
+  transform-origin: top left;
+}
+
+.export-timetable-gallery[data-export-columns="2"] {
+  grid-template-columns: repeat(2, var(--export-card-width));
+}
+
+.export-timetable-gallery[data-export-columns="3"] {
+  grid-template-columns: repeat(3, var(--export-card-width));
+}
+
+.export-timetable-gallery[data-export-columns="4"] {
+  grid-template-columns: repeat(4, var(--export-card-width));
+}
+
+.export-timetable-card {
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  background-color: #ffffff;
+  padding: 0.75rem;
+  box-sizing: border-box;
+  /* Do not clip or scroll individual tables — show the full weekday grid */
+  overflow: visible;
+  width: var(--export-card-width);
+  max-width: none;
+  /* Compact slot height so multiple columns stay readable */
+  --timetable-slot-height: 1.65rem;
+}
+
+.export-timetable-card-title {
+  margin: 0;
+  font-weight: 600;
+  word-break: break-word;
+  min-height: 1.5rem;
+}
+
+.export-timetable-card .timetable-grid-wrapper {
+  margin-bottom: 0;
+  /* Override shared overflow-x: auto so tables do not scroll on their own */
+  overflow: visible;
+}
+
+.export-timetable-card .timetable-grid {
+  /* Standardized by JS to fixed rem columns; fill the card width */
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.export-timetable-card .timetable-grid-header,
+.export-timetable-card .timetable-grid-timeslot-label {
+  font-size: 0.7rem;
+  padding: 0.15rem 0.25rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.export-timetable-card .timetable-lesson .card-body {
+  padding: 0.2rem !important;
+}
+
+.export-timetable-card .timetable-lesson .card-title {
+  font-size: 0.7rem;
+  margin-bottom: 0.1rem !important;
+}
+
+.export-timetable-card .timetable-lesson .card-text,
+.export-timetable-card .timetable-lesson small {
+  font-size: 0.6rem;
+  margin-bottom: 0 !important;
+}
+
+.export-timetable-card .lesson-violation-badge,
+.export-timetable-card .lesson-card-actions {
+  display: none;
+}
+
+/* Print / Save as PDF: hide chrome, keep gallery columns */
+@media print {
+  .no-print,
+  .schedule-popout-header,
+  .export-toolbar {
+    display: none !important;
+  }
+
+  body {
+    background: #ffffff !important;
+  }
+
+  main.container-fluid {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: none !important;
+  }
+
+  .export-timetable-gallery {
+    zoom: 1 !important;
+    transform: none !important;
+    display: grid !important;
+    gap: 0.5rem !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  .export-timetable-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+    border-color: #adb5bd;
+  }
+}

@@ -1,0 +1,28 @@
+# Build outputs
+target/
+node_modules/
+timefold/chat-agent/dist/
+*.class
+__pycache__/
+*.pyc
+
+# IDE
+.idea/
+*.iml
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Temporary Excel lock files
+~$*.xlsx
+
+# Logs and local run artifacts
+*.log
+
+# API keys and local secrets
+.env
+**/.env
+
+# Local reference code (Mahlous demo); keep on disk only, not on GitHub
+references/timetable_demo/
