@@ -47,6 +47,110 @@ function normalizePreferredWeekdays(raw) {
 }
 
 /**
+ * Returns Mon–Fri days present in a raw availability list, in calendar order.
+ */
+function normalizeTeacherAvailabilityDays(rawDays) {
+  const allowed = new Set();
+  for (const day of rawDays || []) {
+    const value = String(day).trim();
+    if (TEACHER_AVAILABILITY_DAYS.includes(value)) {
+      allowed.add(value);
+    }
+  }
+  return TEACHER_AVAILABILITY_DAYS.filter(day => allowed.has(day));
+}
+
+/**
+ * Clones a teacher-availability map, keeping only valid weekday names.
+ */
+function cloneTeacherAvailability(map) {
+  const cloned = {};
+  if (map == null || typeof map !== "object" || Array.isArray(map)) {
+    return cloned;
+  }
+  for (const teacher of Object.keys(map)) {
+    cloned[teacher] = normalizeTeacherAvailabilityDays(map[teacher]);
+  }
+  return cloned;
+}
+
+/**
+ * True when workspace JSON includes a persisted teacher-availability map.
+ */
+function hasPersistedTeacherAvailability(rawMap) {
+  return rawMap != null && typeof rawMap === "object" && !Array.isArray(rawMap)
+    && Object.keys(rawMap).length > 0;
+}
+
+/**
+ * Builds a complete teacher-availability map for the given teachers.
+ * Missing teachers default to available every weekday.
+ */
+function buildTeacherAvailabilityMap(teachers, rawMap) {
+  const normalizedRaw = cloneTeacherAvailability(rawMap);
+  const result = {};
+  for (const teacher of teachers || []) {
+    result[teacher] = Object.prototype.hasOwnProperty.call(normalizedRaw, teacher)
+      ? normalizedRaw[teacher].slice()
+      : TEACHER_AVAILABILITY_DAYS.slice();
+  }
+  return result;
+}
+
+/**
+ * Days the teacher is unavailable (Mon–Fri minus available days).
+ * Missing map entry means available every day.
+ */
+function unavailableDaysForTeacher(teacherName) {
+  if (!teacherName || !preparationState.teacherAvailability[teacherName]) {
+    return [];
+  }
+  const availableDays = preparationState.teacherAvailability[teacherName];
+  return TEACHER_AVAILABILITY_DAYS.filter(day => !availableDays.includes(day));
+}
+
+/**
+ * Writes teacherUnavailableDays onto one card from the current availability map.
+ */
+function applyTeacherAvailabilityToCard(card) {
+  if (!card) {
+    return;
+  }
+  card.teacherUnavailableDays = unavailableDaysForTeacher(card.teacher);
+}
+
+/**
+ * Syncs teacherUnavailableDays on every subject card from teacherAvailability.
+ */
+function syncAllCardsTeacherAvailability() {
+  for (const card of preparationState.cards) {
+    applyTeacherAvailabilityToCard(card);
+  }
+}
+
+/**
+ * Derives a teacher-availability map from lessons/cards that store unavailable days.
+ * Used when loading legacy workspace JSON that did not persist teacherAvailability.
+ */
+function deriveTeacherAvailabilityFromLessonList(teachers, lessons) {
+  const availability = buildTeacherAvailabilityMap(teachers, {});
+  for (const lesson of lessons || []) {
+    const teacher = lesson.teacher;
+    const unavailable = (lesson.teacherUnavailableDays || [])
+      .map(day => String(day).trim())
+      .filter(day => TEACHER_AVAILABILITY_DAYS.includes(day));
+    if (!teacher || unavailable.length === 0) {
+      continue;
+    }
+    if (!availability[teacher]) {
+      availability[teacher] = TEACHER_AVAILABILITY_DAYS.slice();
+    }
+    availability[teacher] = availability[teacher].filter(day => !unavailable.includes(day));
+  }
+  return availability;
+}
+
+/**
  * Normalizes parallel card IDs from workspace/lesson JSON.
  * Missing/null defaults to an empty list (no parallel pairing).
  * Ignores legacy subject-name values that are not card IDs.
@@ -461,15 +565,7 @@ function buildTimetableJson() {
       .map(name => roomNameToId.get(name))
       .filter(id => id != null);
 
-    // Derive teacherUnavailableDays from teacherAvailability map
-    // If teacher has no availability entry, they're available all days (empty list)
-    // Otherwise, unavailable days are all days NOT in their availability list
-    let teacherUnavailableDays = [];
-    if (card.teacher && preparationState.teacherAvailability[card.teacher]) {
-      const availableDays = preparationState.teacherAvailability[card.teacher];
-      teacherUnavailableDays = TEACHER_AVAILABILITY_DAYS.filter(day => !availableDays.includes(day));
-    }
-
+    // Teacher unavailable days come from the per-teacher availability map
     return {
       id: card.id,
       subject: card.subjectName,
@@ -477,7 +573,7 @@ function buildTimetableJson() {
       studentGroup: card.studentGroup,
       durationInMinutes: durationInMinutes,
       subjectTypes: (card.subjectTypes || []).slice(),
-      teacherUnavailableDays: teacherUnavailableDays,
+      teacherUnavailableDays: unavailableDaysForTeacher(card.teacher),
       // Preferred weekdays for the Preferred weekday soft constraint
       preferredWeekdays: normalizePreferredWeekdays(card.preferredWeekdays),
       // Linked subject-card IDs for the Parallel subject soft constraint
@@ -505,6 +601,8 @@ function buildTimetableJson() {
 function buildWorkspaceJson() {
   syncPreparationMetaFromForm();
   validatePreparationMetaOrThrow();
+  // Keep card.teacherUnavailableDays in sync so download/save round-trips availability
+  syncAllCardsTeacherAvailability();
   return {
     format: PREPARATION_WORKSPACE_FORMAT,
     name: preparationState.name,
@@ -515,6 +613,8 @@ function buildWorkspaceJson() {
       subjects: preparationState.subjects.map(cloneSubject),
       studentGroups: preparationState.studentGroups.slice(),
       teachers: preparationState.teachers.slice(),
+      // Persist weekday availability so upload/load restores teacher checkboxes
+      teacherAvailability: cloneTeacherAvailability(preparationState.teacherAvailability),
       rooms: preparationState.rooms.map(room => ({ name: room.name, priority: room.priority || 0 })),
       cards: preparationState.cards.map(cloneCard)
     },
@@ -545,7 +645,10 @@ function cloneCard(card) {
     teacher: card.teacher == null || card.teacher === "" ? null : card.teacher,
     subjectTypes: (card.subjectTypes || []).slice(),
     roomNames: (card.roomNames || []).slice(),
-    teacherUnavailableDays: (card.teacherUnavailableDays || []).slice(),
+    // Prefer the live teacher map; fall back to the card field for legacy in-memory state
+    teacherUnavailableDays: preparationState.teacherAvailability[card.teacher]
+      ? unavailableDaysForTeacher(card.teacher)
+      : (card.teacherUnavailableDays || []).slice(),
     preferredWeekdays: normalizePreferredWeekdays(card.preferredWeekdays),
     parallelCardIds: normalizeParallelCardIds(card.parallelCardIds || card.parallelSubjects)
   };
@@ -805,13 +908,32 @@ function applyWorkspaceJson(workspaceJson) {
   preparationState.teachers = (prep.teachers || []).slice();
   preparationState.cards = (prep.cards || []).map(card => normalizeCard(
     card, legacyRoomIdToName, legacySubjectIdToName, legacySubjectDurationByName));
-  
-  // Derive teacher availability from loaded cards
-  deriveTeacherAvailabilityFromCards();
-  
+
+  // Restore weekday checkboxes from the persisted map; fall back to cards/lessons
+  restoreTeacherAvailabilityFromWorkspace(workspaceJson, preparationState.cards);
+  // Mirror the restored map onto cards so later exports stay consistent
+  syncAllCardsTeacherAvailability();
+
   sanitizeAllCardSubjectTypes();
   recomputeIdCounters();
   renderPreparationUi();
+}
+
+/**
+ * Restores teacher weekday availability after workspace load.
+ * Prefers the persisted map; older files reconstruct it from cards and timetable lessons.
+ */
+function restoreTeacherAvailabilityFromWorkspace(workspaceJson, cards) {
+  const prep = (workspaceJson && workspaceJson.preparation) || {};
+  if (hasPersistedTeacherAvailability(prep.teacherAvailability)) {
+    preparationState.teacherAvailability = buildTeacherAvailabilityMap(
+      preparationState.teachers, prep.teacherAvailability);
+    return;
+  }
+  const lessons = (workspaceJson && workspaceJson.timetable && workspaceJson.timetable.lessons) || [];
+  // Union cards + lessons so older downloads (map missing, cards empty, lessons populated) recover
+  preparationState.teacherAvailability = deriveTeacherAvailabilityFromLessonList(
+    preparationState.teachers, (cards || []).concat(lessons));
 }
 
 /**
@@ -820,28 +942,8 @@ function applyWorkspaceJson(workspaceJson) {
  * If a teacher has no lessons with unavailable days, they are available all days.
  */
 function deriveTeacherAvailabilityFromCards() {
-  preparationState.teacherAvailability = {};
-  
-  // Initialize all teachers as available all days
-  for (const teacher of preparationState.teachers) {
-    preparationState.teacherAvailability[teacher] = TEACHER_AVAILABILITY_DAYS.slice();
-  }
-  
-  // Collect unavailable days from each card
-  for (const card of preparationState.cards) {
-    if (!card.teacher || !card.teacherUnavailableDays || card.teacherUnavailableDays.length === 0) {
-      continue;
-    }
-    
-    const teacher = card.teacher;
-    if (!preparationState.teacherAvailability[teacher]) {
-      preparationState.teacherAvailability[teacher] = TEACHER_AVAILABILITY_DAYS.slice();
-    }
-    
-    // Remove unavailable days from the teacher's available days
-    preparationState.teacherAvailability[teacher] = preparationState.teacherAvailability[teacher]
-      .filter(day => !card.teacherUnavailableDays.includes(day));
-  }
+  preparationState.teacherAvailability = deriveTeacherAvailabilityFromLessonList(
+    preparationState.teachers, preparationState.cards);
 }
 
 /**
@@ -1020,6 +1122,8 @@ function buildWorkspaceJsonFromTimetable(timetable) {
   const lessons = timetable.lessons || [];
   const eca = extractEcaFromTimetable(timetable);
   const workspaceName = timetable.name || "Subject cards from AI Scheduler";
+  const teachers = [...new Set(lessons.map(lesson => lesson.teacher).filter(Boolean))].sort();
+  const cards = buildPreparationCardsFromDemoLessons(lessons, roomNames, timetable.rooms);
   return {
     format: PREPARATION_WORKSPACE_FORMAT,
     name: workspaceName,
@@ -1029,9 +1133,11 @@ function buildWorkspaceJsonFromTimetable(timetable) {
     preparation: {
       subjects: buildPreparationSubjectsFromDemoLessons(lessons, roomNames),
       studentGroups: [...new Set(lessons.map(lesson => lesson.studentGroup).filter(Boolean))].sort(),
-      teachers: [...new Set(lessons.map(lesson => lesson.teacher).filter(Boolean))].sort(),
+      teachers: teachers,
+      // Rebuild the weekday map from lessons so Preparation checkboxes survive this export
+      teacherAvailability: deriveTeacherAvailabilityFromLessonList(teachers, lessons),
       rooms: rooms.map(room => ({ name: room.name, priority: room.priority || 0 })),
-      cards: buildPreparationCardsFromDemoLessons(lessons, roomNames, timetable.rooms)
+      cards: cards
     },
     // Keep the original timetable payload so AI Scheduler can load this file back.
     timetable: {
@@ -1075,11 +1181,9 @@ function applyDemoTimetableToPreparation(timetable, demoDataId) {
   preparationState.subjects = buildPreparationSubjectsFromDemoLessons(lessons, roomNames);
   preparationState.studentGroups = [...new Set(lessons.map(lesson => lesson.studentGroup).filter(Boolean))].sort();
   preparationState.teachers = [...new Set(lessons.map(lesson => lesson.teacher).filter(Boolean))].sort();
-  preparationState.teacherAvailability = {};
-  for (const teacher of preparationState.teachers) {
-    preparationState.teacherAvailability[teacher] = TEACHER_AVAILABILITY_DAYS.slice();
-  }
   preparationState.cards = buildPreparationCardsFromDemoLessons(lessons, roomNames, rooms);
+  // Rebuild weekday checkboxes from lesson.teacherUnavailableDays instead of defaulting to all days
+  deriveTeacherAvailabilityFromCards();
   sanitizeAllCardSubjectTypes();
   recomputeIdCounters();
   renderPreparationUi();
@@ -2204,11 +2308,13 @@ function saveCard() {
       if (!card.parallelCardIds) {
         card.parallelCardIds = [];
       }
+      // Teacher may have changed; copy that teacher's current weekday availability
+      applyTeacherAvailabilityToCard(card);
     }
     editingCardId = null;
     showPreparationMessage("Subject card updated.", "success");
   } else {
-    preparationState.cards.push({
+    const newCard = {
       id: formatPreparationId(nextCardNumericId++),
       subjectName: subjectName,
       durationInMinutes: duration,
@@ -2218,7 +2324,9 @@ function saveCard() {
       roomNames: roomNames,
       preferredWeekdays: defaultPreferredWeekdays(),
       parallelCardIds: []
-    });
+    };
+    applyTeacherAvailabilityToCard(newCard);
+    preparationState.cards.push(newCard);
     showPreparationMessage("Subject card created.", "success");
   }
 
@@ -2232,7 +2340,7 @@ function copyCard(cardId) {
   if (!sourceCard) {
     return;
   }
-  preparationState.cards.push({
+  const copiedCard = {
     id: formatPreparationId(nextCardNumericId++),
     subjectName: sourceCard.subjectName,
     durationInMinutes: sourceCard.durationInMinutes == null ? null : sourceCard.durationInMinutes,
@@ -2242,8 +2350,10 @@ function copyCard(cardId) {
     roomNames: (sourceCard.roomNames || []).slice(),
     preferredWeekdays: normalizePreferredWeekdays(sourceCard.preferredWeekdays),
     parallelCardIds: []
-  });
-  showPreparationMessage("Subject card copied as " + preparationState.cards[preparationState.cards.length - 1].id + ".", "success");
+  };
+  applyTeacherAvailabilityToCard(copiedCard);
+  preparationState.cards.push(copiedCard);
+  showPreparationMessage("Subject card copied as " + copiedCard.id + ".", "success");
   renderPreparationUi();
 }
 
